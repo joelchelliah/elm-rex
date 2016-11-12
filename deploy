@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+# Deploy the application by pushing files to gh-pages
+
+OUT_FILE='elm.js'
+OUT_PATH=target/$OUT_FILE
+
+#   1. Build the application (This is done automaticall by Atom)
+# elm-make src/Main.elm --output $OUT_PATH
+
+#   2. Push to gh-pages
+mkdir tmp
+cp $OUT_PATH tmp/
+
+git checkout gh-pages
+cp -f tmp/$OUT_FILE $OUT_PATH
+
+git add $OUT_PATH
+git commit -m "Deployed new version to gh-pages!"
+git push origin gh-pages
+
+#   3. Clean up
+rm -rf tmp
+git checkout master
