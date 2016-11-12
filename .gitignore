@@ -1,2 +1,8 @@
-target
 elm-stuff
+src
+tmp
+
+build
+deploy
+
+*.json
