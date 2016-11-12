@@ -1,14 +1,16 @@
-module Rex exposing ( Model, Msg, init, update, view,
+module Rex exposing ( Model, Msg(..), init, update, view,
                       run, duck, jump)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Element exposing (..)
+import Svg exposing (Svg, Attribute)
+import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
+import Element exposing (Element)
+import Time exposing (Time)
 
 -- Model
 
-type alias Model = { img : Element
-                   , state : State
+type alias Model = { state : State
+                   , yPos: Float
+                   , yVel: Float
                    }
 
 type State = Idle
@@ -18,13 +20,8 @@ type State = Idle
            | Dead
 
 init : Model
-init = Model runningImg Idle
+init = Model Idle 0 0
 
-runningImg : Element
-runningImg = (image 100 100 "images/rex.jpg")
-
-duckingImg : Element
-duckingImg = (image 100 40 "images/rex.jpg")
 
 -- Update
 
@@ -32,24 +29,59 @@ type Msg = Run
          | Jump
          | Duck
          | Kill
+         | Tick Float
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Run  -> { model | img = runningImg
-                    , state = Running
+    Run  -> if model.state == Jumping
+            then model
+            else { model | state = Running }
+    Jump -> { model | state = Jumping
                     }
-    Jump -> model
-    Duck -> { model | img = duckingImg
-                    , state = Ducking
+    Duck -> { model | state = Ducking
                     }
     Kill -> model
+
+    Tick delta -> move delta model
+
+move : Time -> Model -> Model
+move delta ({yPos, yVel} as model) =
+  let (state', yPos', yVel') = if yPos >= 0
+                               then (Running, 0, 0)
+                               else (Jumping, yPos + yVel * delta, yVel)
+  in { model | yPos = yPos'
+             , yVel = yVel'
+             , state = state' }
+
+fly : Time -> Float -> Float -> (Float,Float)
+fly delta y vy = (y + vy * delta, vy)
+
+fall : Time -> Float -> Float -> (Float,Float)
+fall delta y vy = (y + vy * delta, vy)
 
 
 -- View
 
-view : Model -> Html Msg
-view model = div [id "rex"] [toHtml model.img]
+view : (Int,Int) -> Model -> Svg Msg
+view (w, h) rex =
+  let x' = 50 |> toString
+      y' = h - 110 |> toString
+  in  Svg.image [ x x'
+                , y y'
+                , width "100"
+                , height "100"
+                , xlinkHref <| render rex
+                ]
+                []
+
+render: Model -> String
+render {state} = case state of
+    Idle    -> "images/idle.jpg"
+    Running -> "images/idle.jpg"
+    Jumping -> "images/idle.jpg"
+    Ducking -> "images/duck.jpg"
+    Dead    -> "images/idle.jpg"
 
 
 -- Actions
