@@ -1,3 +1,5 @@
+import Rex as Rex
+
 import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
@@ -13,32 +15,34 @@ main = App.program { init = init
 
 -- Model
 
-type alias Model = { rex: String
+type alias Model = { rex: Rex.Model
                    , obstacles : List String
                    }
-                   
+
 init : (Model, Cmd Msg)
-init = (Model "RAWR! (todo)" [], Cmd.none)
+init = (Model Rex.init [], Cmd.none)
 
 
 -- Update
 
-type Msg = Tick Time
+type Msg = Tick
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Tick newTime -> (model, Cmd.none)
+    Tick -> (model, Cmd.none)
 
 
 -- Subscriptions
 
 subscriptions : Model -> Sub Msg
-subscriptions model = Time.every second Tick
+subscriptions model = Time.every second (\_ -> Tick)
 
 
 -- View
 
 view : Model -> Html Msg
-view model = div [id "main-container"]
-                 [text (toString model)]
+view {rex, obstacles} =
+  let viewRex = App.map (\_ -> Tick) (Rex.view rex)
+  in div [id "main"]
+         [viewRex]
