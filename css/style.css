@@ -1,0 +1,11 @@
+#main {
+  background-color: #A9E;
+  height: 400px;
+  position: relative;
+}
+
+#rex {
+  position: absolute;
+  bottom: 5%;
+  left: 5%;
+}
