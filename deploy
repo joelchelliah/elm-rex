@@ -2,20 +2,23 @@
 
 # Deploy the application by pushing files to gh-pages
 
-OUT_FILE='elm.js'
-OUT_PATH=target/$OUT_FILE
+CSS_PATH='css'
+IMG_PATH='images'
+TAR_PATH='target'
 
 #   1. Build the application (This is done automaticall by Atom)
 # elm-make src/Main.elm --output $OUT_PATH
 
 #   2. Push to gh-pages
 mkdir tmp
-cp $OUT_PATH tmp/
+cp -r $CSS_PATH tmp/
+cp -r $IMG_PATH tmp/
+cp -r $TAR_PATH tmp/
 
 git checkout gh-pages
-cp -f tmp/$OUT_FILE $OUT_PATH
+cp -rf tmp/* .
 
-git add $OUT_PATH
+git add $CSS_PATH $IMG_PATH $TAR_PATH
 git commit -m "Deployed new version to gh-pages!"
 git push origin gh-pages
 
