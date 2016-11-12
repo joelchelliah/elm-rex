@@ -4,7 +4,10 @@ import Html exposing (..)
 import Html.App as App
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Time exposing (Time, second)
+import Time exposing (Time, millisecond)
+import Keyboard exposing (KeyCode)
+import Char exposing (fromCode)
+import String exposing (fromChar)
 
 
 main = App.program { init = init
@@ -26,17 +29,32 @@ init = (Model Rex.init [], Cmd.none)
 -- Update
 
 type Msg = Tick
+         | KeyPressed KeyCode
+         | KeyReleased
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Tick -> (model, Cmd.none)
+    KeyPressed code -> ({model | rex = Rex.update (codeToMsg code) model.rex}, Cmd.none)
+    KeyReleased     -> ({model | rex = Rex.update Rex.run model.rex}, Cmd.none)
+    Tick            -> (model, Cmd.none)
 
+
+codeToMsg : KeyCode -> Rex.Msg
+codeToMsg code =
+  case code of
+    40 -> Rex.duck
+    38 -> Rex.jump
+    _  -> Rex.run
 
 -- Subscriptions
 
 subscriptions : Model -> Sub Msg
-subscriptions model = Time.every second (\_ -> Tick)
+subscriptions _ =
+  Sub.batch [ Time.every 1000 (\_ -> Tick)
+            , Keyboard.downs KeyPressed
+            , Keyboard.ups (\_ -> KeyReleased)
+            ]
 
 
 -- View
