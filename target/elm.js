@@ -6550,6 +6550,10 @@ return {
 
 }();
 
+var _elm_lang$core$Process$kill = _elm_lang$core$Native_Scheduler.kill;
+var _elm_lang$core$Process$sleep = _elm_lang$core$Native_Scheduler.sleep;
+var _elm_lang$core$Process$spawn = _elm_lang$core$Native_Scheduler.spawn;
+
 var _elm_lang$core$Regex$split = _elm_lang$core$Native_Regex.split;
 var _elm_lang$core$Regex$replace = _elm_lang$core$Native_Regex.replace;
 var _elm_lang$core$Regex$find = _elm_lang$core$Native_Regex.find;
@@ -6566,6 +6570,184 @@ var _elm_lang$core$Regex$AtMost = function (a) {
 	return {ctor: 'AtMost', _0: a};
 };
 var _elm_lang$core$Regex$All = {ctor: 'All'};
+
+var _elm_lang$dom$Native_Dom = function() {
+
+function on(node)
+{
+	return function(eventName, decoder, toTask)
+	{
+		return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback) {
+
+			function performTask(event)
+			{
+				var result = A2(_elm_lang$core$Json_Decode$decodeValue, decoder, event);
+				if (result.ctor === 'Ok')
+				{
+					_elm_lang$core$Native_Scheduler.rawSpawn(toTask(result._0));
+				}
+			}
+
+			node.addEventListener(eventName, performTask);
+
+			return function()
+			{
+				node.removeEventListener(eventName, performTask);
+			};
+		});
+	};
+}
+
+var rAF = typeof requestAnimationFrame !== 'undefined'
+	? requestAnimationFrame
+	: function(callback) { callback(); };
+
+function withNode(id, doStuff)
+{
+	return _elm_lang$core$Native_Scheduler.nativeBinding(function(callback)
+	{
+		rAF(function()
+		{
+			var node = document.getElementById(id);
+			if (node === null)
+			{
+				callback(_elm_lang$core$Native_Scheduler.fail({ ctor: 'NotFound', _0: id }));
+				return;
+			}
+			callback(_elm_lang$core$Native_Scheduler.succeed(doStuff(node)));
+		});
+	});
+}
+
+
+// FOCUS
+
+function focus(id)
+{
+	return withNode(id, function(node) {
+		node.focus();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function blur(id)
+{
+	return withNode(id, function(node) {
+		node.blur();
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SCROLLING
+
+function getScrollTop(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollTop;
+	});
+}
+
+function setScrollTop(id, desiredScrollTop)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = desiredScrollTop;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toBottom(id)
+{
+	return withNode(id, function(node) {
+		node.scrollTop = node.scrollHeight;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function getScrollLeft(id)
+{
+	return withNode(id, function(node) {
+		return node.scrollLeft;
+	});
+}
+
+function setScrollLeft(id, desiredScrollLeft)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = desiredScrollLeft;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+function toRight(id)
+{
+	return withNode(id, function(node) {
+		node.scrollLeft = node.scrollWidth;
+		return _elm_lang$core$Native_Utils.Tuple0;
+	});
+}
+
+
+// SIZE
+
+function width(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollWidth;
+			case 'VisibleContent':
+				return node.clientWidth;
+			case 'VisibleContentWithBorders':
+				return node.offsetWidth;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.right - rect.left;
+		}
+	});
+}
+
+function height(options, id)
+{
+	return withNode(id, function(node) {
+		switch (options.ctor)
+		{
+			case 'Content':
+				return node.scrollHeight;
+			case 'VisibleContent':
+				return node.clientHeight;
+			case 'VisibleContentWithBorders':
+				return node.offsetHeight;
+			case 'VisibleContentWithBordersAndMargins':
+				var rect = node.getBoundingClientRect();
+				return rect.bottom - rect.top;
+		}
+	});
+}
+
+return {
+	onDocument: F3(on(document)),
+	onWindow: F3(on(window)),
+
+	focus: focus,
+	blur: blur,
+
+	getScrollTop: getScrollTop,
+	setScrollTop: F2(setScrollTop),
+	getScrollLeft: getScrollLeft,
+	setScrollLeft: F2(setScrollLeft),
+	toBottom: toBottom,
+	toRight: toRight,
+
+	height: F2(height),
+	width: F2(width)
+};
+
+}();
+
+var _elm_lang$dom$Dom_LowLevel$onWindow = _elm_lang$dom$Native_Dom.onWindow;
+var _elm_lang$dom$Dom_LowLevel$onDocument = _elm_lang$dom$Native_Dom.onDocument;
 
 //import Native.Json //
 
@@ -8647,6 +8829,176 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _elm_lang$keyboard$Keyboard$onSelfMsg = F3(
+	function (router, _p0, state) {
+		var _p1 = _p0;
+		var _p2 = A2(_elm_lang$core$Dict$get, _p1.category, state);
+		if (_p2.ctor === 'Nothing') {
+			return _elm_lang$core$Task$succeed(state);
+		} else {
+			var send = function (tagger) {
+				return A2(
+					_elm_lang$core$Platform$sendToApp,
+					router,
+					tagger(_p1.keyCode));
+			};
+			return A2(
+				_elm_lang$core$Task$andThen,
+				_elm_lang$core$Task$sequence(
+					A2(_elm_lang$core$List$map, send, _p2._0.taggers)),
+				function (_p3) {
+					return _elm_lang$core$Task$succeed(state);
+				});
+		}
+	});
+var _elm_lang$keyboard$Keyboard_ops = _elm_lang$keyboard$Keyboard_ops || {};
+_elm_lang$keyboard$Keyboard_ops['&>'] = F2(
+	function (t1, t2) {
+		return A2(
+			_elm_lang$core$Task$andThen,
+			t1,
+			function (_p4) {
+				return t2;
+			});
+	});
+var _elm_lang$keyboard$Keyboard$init = _elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty);
+var _elm_lang$keyboard$Keyboard$categorizeHelpHelp = F2(
+	function (value, maybeValues) {
+		var _p5 = maybeValues;
+		if (_p5.ctor === 'Nothing') {
+			return _elm_lang$core$Maybe$Just(
+				_elm_lang$core$Native_List.fromArray(
+					[value]));
+		} else {
+			return _elm_lang$core$Maybe$Just(
+				A2(_elm_lang$core$List_ops['::'], value, _p5._0));
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorizeHelp = F2(
+	function (subs, subDict) {
+		categorizeHelp:
+		while (true) {
+			var _p6 = subs;
+			if (_p6.ctor === '[]') {
+				return subDict;
+			} else {
+				var _v4 = _p6._1,
+					_v5 = A3(
+					_elm_lang$core$Dict$update,
+					_p6._0._0,
+					_elm_lang$keyboard$Keyboard$categorizeHelpHelp(_p6._0._1),
+					subDict);
+				subs = _v4;
+				subDict = _v5;
+				continue categorizeHelp;
+			}
+		}
+	});
+var _elm_lang$keyboard$Keyboard$categorize = function (subs) {
+	return A2(_elm_lang$keyboard$Keyboard$categorizeHelp, subs, _elm_lang$core$Dict$empty);
+};
+var _elm_lang$keyboard$Keyboard$keyCode = A2(_elm_lang$core$Json_Decode_ops[':='], 'keyCode', _elm_lang$core$Json_Decode$int);
+var _elm_lang$keyboard$Keyboard$subscription = _elm_lang$core$Native_Platform.leaf('Keyboard');
+var _elm_lang$keyboard$Keyboard$Watcher = F2(
+	function (a, b) {
+		return {taggers: a, pid: b};
+	});
+var _elm_lang$keyboard$Keyboard$Msg = F2(
+	function (a, b) {
+		return {category: a, keyCode: b};
+	});
+var _elm_lang$keyboard$Keyboard$onEffects = F3(
+	function (router, newSubs, oldState) {
+		var rightStep = F3(
+			function (category, taggers, task) {
+				return A2(
+					_elm_lang$core$Task$andThen,
+					task,
+					function (state) {
+						return A2(
+							_elm_lang$core$Task$andThen,
+							_elm_lang$core$Process$spawn(
+								A3(
+									_elm_lang$dom$Dom_LowLevel$onDocument,
+									category,
+									_elm_lang$keyboard$Keyboard$keyCode,
+									function (_p7) {
+										return A2(
+											_elm_lang$core$Platform$sendToSelf,
+											router,
+											A2(_elm_lang$keyboard$Keyboard$Msg, category, _p7));
+									})),
+							function (pid) {
+								return _elm_lang$core$Task$succeed(
+									A3(
+										_elm_lang$core$Dict$insert,
+										category,
+										A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, pid),
+										state));
+							});
+					});
+			});
+		var bothStep = F4(
+			function (category, _p8, taggers, task) {
+				var _p9 = _p8;
+				return A2(
+					_elm_lang$core$Task$andThen,
+					task,
+					function (state) {
+						return _elm_lang$core$Task$succeed(
+							A3(
+								_elm_lang$core$Dict$insert,
+								category,
+								A2(_elm_lang$keyboard$Keyboard$Watcher, taggers, _p9.pid),
+								state));
+					});
+			});
+		var leftStep = F3(
+			function (category, _p10, task) {
+				var _p11 = _p10;
+				return A2(
+					_elm_lang$keyboard$Keyboard_ops['&>'],
+					_elm_lang$core$Process$kill(_p11.pid),
+					task);
+			});
+		return A6(
+			_elm_lang$core$Dict$merge,
+			leftStep,
+			bothStep,
+			rightStep,
+			oldState,
+			_elm_lang$keyboard$Keyboard$categorize(newSubs),
+			_elm_lang$core$Task$succeed(_elm_lang$core$Dict$empty));
+	});
+var _elm_lang$keyboard$Keyboard$MySub = F2(
+	function (a, b) {
+		return {ctor: 'MySub', _0: a, _1: b};
+	});
+var _elm_lang$keyboard$Keyboard$presses = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keypress', tagger));
+};
+var _elm_lang$keyboard$Keyboard$downs = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keydown', tagger));
+};
+var _elm_lang$keyboard$Keyboard$ups = function (tagger) {
+	return _elm_lang$keyboard$Keyboard$subscription(
+		A2(_elm_lang$keyboard$Keyboard$MySub, 'keyup', tagger));
+};
+var _elm_lang$keyboard$Keyboard$subMap = F2(
+	function (func, _p12) {
+		var _p13 = _p12;
+		return A2(
+			_elm_lang$keyboard$Keyboard$MySub,
+			_p13._0,
+			function (_p14) {
+				return func(
+					_p13._1(_p14));
+			});
+	});
+_elm_lang$core$Native_Platform.effectManagers['Keyboard'] = {pkg: 'elm-lang/keyboard', init: _elm_lang$keyboard$Keyboard$init, onEffects: _elm_lang$keyboard$Keyboard$onEffects, onSelfMsg: _elm_lang$keyboard$Keyboard$onSelfMsg, tag: 'sub', subMap: _elm_lang$keyboard$Keyboard$subMap};
+
 var _evancz$elm_graphics$Native_Element = function()
 {
 
@@ -10007,38 +10359,85 @@ var _joelchelliah$elm_rex$Rex$view = function (model) {
 				_evancz$elm_graphics$Element$toHtml(model.img)
 			]));
 };
-var _joelchelliah$elm_rex$Rex$update = F2(
-	function (msg, model) {
-		var _p0 = msg;
-		switch (_p0.ctor) {
-			case 'Run':
-				return model;
-			case 'Jump':
-				return model;
-			default:
-				return model;
-		}
-	});
+var _joelchelliah$elm_rex$Rex$duckingImg = A3(_evancz$elm_graphics$Element$image, 100, 40, 'images/rex.jpg');
+var _joelchelliah$elm_rex$Rex$runningImg = A3(_evancz$elm_graphics$Element$image, 100, 100, 'images/rex.jpg');
 var _joelchelliah$elm_rex$Rex$Model = F2(
 	function (a, b) {
 		return {img: a, state: b};
 	});
 var _joelchelliah$elm_rex$Rex$Dead = {ctor: 'Dead'};
+var _joelchelliah$elm_rex$Rex$Ducking = {ctor: 'Ducking'};
 var _joelchelliah$elm_rex$Rex$Jumping = {ctor: 'Jumping'};
 var _joelchelliah$elm_rex$Rex$Running = {ctor: 'Running'};
-var _joelchelliah$elm_rex$Rex$Idle = {ctor: 'Idle'};
-var _joelchelliah$elm_rex$Rex$init = A2(
-	_joelchelliah$elm_rex$Rex$Model,
-	A3(_evancz$elm_graphics$Element$image, 100, 100, 'images/rex.jpg'),
-	_joelchelliah$elm_rex$Rex$Idle);
-var _joelchelliah$elm_rex$Rex$Kill = {ctor: 'Kill'};
-var _joelchelliah$elm_rex$Rex$Jump = {ctor: 'Jump'};
-var _joelchelliah$elm_rex$Rex$Run = {ctor: 'Run'};
-
-var _joelchelliah$elm_rex$Main$update = F2(
+var _joelchelliah$elm_rex$Rex$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
-		return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+		switch (_p0.ctor) {
+			case 'Run':
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{img: _joelchelliah$elm_rex$Rex$runningImg, state: _joelchelliah$elm_rex$Rex$Running});
+			case 'Jump':
+				return model;
+			case 'Duck':
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{img: _joelchelliah$elm_rex$Rex$duckingImg, state: _joelchelliah$elm_rex$Rex$Ducking});
+			default:
+				return model;
+		}
+	});
+var _joelchelliah$elm_rex$Rex$Idle = {ctor: 'Idle'};
+var _joelchelliah$elm_rex$Rex$init = A2(_joelchelliah$elm_rex$Rex$Model, _joelchelliah$elm_rex$Rex$runningImg, _joelchelliah$elm_rex$Rex$Idle);
+var _joelchelliah$elm_rex$Rex$Kill = {ctor: 'Kill'};
+var _joelchelliah$elm_rex$Rex$Duck = {ctor: 'Duck'};
+var _joelchelliah$elm_rex$Rex$duck = _joelchelliah$elm_rex$Rex$Duck;
+var _joelchelliah$elm_rex$Rex$Jump = {ctor: 'Jump'};
+var _joelchelliah$elm_rex$Rex$jump = _joelchelliah$elm_rex$Rex$Jump;
+var _joelchelliah$elm_rex$Rex$Run = {ctor: 'Run'};
+var _joelchelliah$elm_rex$Rex$run = _joelchelliah$elm_rex$Rex$Run;
+
+var _joelchelliah$elm_rex$Main$codeToMsg = function (code) {
+	var _p0 = code;
+	switch (_p0) {
+		case 40:
+			return _joelchelliah$elm_rex$Rex$duck;
+		case 38:
+			return _joelchelliah$elm_rex$Rex$jump;
+		default:
+			return _joelchelliah$elm_rex$Rex$run;
+	}
+};
+var _joelchelliah$elm_rex$Main$update = F2(
+	function (msg, model) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
+			case 'KeyPressed':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							rex: A2(
+								_joelchelliah$elm_rex$Rex$update,
+								_joelchelliah$elm_rex$Main$codeToMsg(_p1._0),
+								model.rex)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'KeyReleased':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							rex: A2(_joelchelliah$elm_rex$Rex$update, _joelchelliah$elm_rex$Rex$run, model.rex)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+		}
 	});
 var _joelchelliah$elm_rex$Main$Model = F2(
 	function (a, b) {
@@ -10053,23 +10452,36 @@ var _joelchelliah$elm_rex$Main$init = {
 			[])),
 	_1: _elm_lang$core$Platform_Cmd$none
 };
-var _joelchelliah$elm_rex$Main$Tick = {ctor: 'Tick'};
-var _joelchelliah$elm_rex$Main$subscriptions = function (model) {
-	return A2(
-		_elm_lang$core$Time$every,
-		_elm_lang$core$Time$second,
-		function (_p1) {
-			return _joelchelliah$elm_rex$Main$Tick;
-		});
+var _joelchelliah$elm_rex$Main$KeyReleased = {ctor: 'KeyReleased'};
+var _joelchelliah$elm_rex$Main$KeyPressed = function (a) {
+	return {ctor: 'KeyPressed', _0: a};
 };
-var _joelchelliah$elm_rex$Main$view = function (_p2) {
-	var _p3 = _p2;
+var _joelchelliah$elm_rex$Main$Tick = {ctor: 'Tick'};
+var _joelchelliah$elm_rex$Main$subscriptions = function (_p2) {
+	return _elm_lang$core$Platform_Sub$batch(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$core$Time$every,
+				1000,
+				function (_p3) {
+					return _joelchelliah$elm_rex$Main$Tick;
+				}),
+				_elm_lang$keyboard$Keyboard$downs(_joelchelliah$elm_rex$Main$KeyPressed),
+				_elm_lang$keyboard$Keyboard$ups(
+				function (_p4) {
+					return _joelchelliah$elm_rex$Main$KeyReleased;
+				})
+			]));
+};
+var _joelchelliah$elm_rex$Main$view = function (_p5) {
+	var _p6 = _p5;
 	var viewRex = A2(
 		_elm_lang$html$Html_App$map,
-		function (_p4) {
+		function (_p7) {
 			return _joelchelliah$elm_rex$Main$Tick;
 		},
-		_joelchelliah$elm_rex$Rex$view(_p3.rex));
+		_joelchelliah$elm_rex$Rex$view(_p6.rex));
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
