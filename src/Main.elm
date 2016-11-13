@@ -1,4 +1,5 @@
-import Rex exposing (Msg)
+import Rex
+import Obstacle
 
 import Html exposing (Html, div)
 import Html.App as App
@@ -22,11 +23,15 @@ main = App.program { init = init
 -- Model
 
 type alias Model = { rex: Rex.Model
-                   , obstacles: List String
+                   , obstacles: List Obstacle.Model
                    }
 
 init : (Model, Cmd Msg)
-init = (Model Rex.init [], Cmd.none)
+init = let obstacles = [Obstacle.init 400
+                       ,Obstacle.init 800
+                       ,Obstacle.init 1000
+                       ]
+       in (Model Rex.init obstacles, Cmd.none)
 
 
 -- Update
@@ -41,16 +46,25 @@ update msg model =
   case msg of
     KeyPressed code -> ({model | rex = Rex.update (codeToMsg code) model.rex}, Cmd.none)
     KeyReleased     -> ({model | rex = Rex.update Rex.run model.rex}, Cmd.none)
-    Tick delta      -> ({model | rex = Rex.update (Rex.Tick delta) model.rex}, Cmd.none)
+    Tick delta      -> ({ model | rex = Rex.update (Rex.Tick delta) model.rex
+                                , obstacles = moveObstacles delta model.obstacles
+                                }, Cmd.none)
     SubMsg          -> (model, Cmd.none)
 
+
+moveObstacles : Float -> List Obstacle.Model -> List Obstacle.Model
+moveObstacles delta obstacles = case obstacles of
+  []   -> []
+  h::t -> if h.xPos < 0
+          then Obstacle.init 900 :: moveObstacles delta t
+          else Obstacle.update delta h :: moveObstacles delta t
 
 codeToMsg : KeyCode -> Rex.Msg
 codeToMsg code =
   case code of
-    40 -> Rex.duck
-    38 -> Rex.jump
-    _  -> Rex.run
+    40 -> Rex.Duck
+    38 -> Rex.Jump
+    _  -> Rex.Run
 
 -- Subscriptions
 
@@ -78,9 +92,13 @@ view ({rex, obstacles} as model) =
       sceneElements = [ renderSky windowSize
                       , renderGround windowSize
                       , App.map (\_ -> SubMsg) (Rex.view windowSize rex)
-                      ]
+                      ] ++ (renderObstacles windowSize obstacles)
+
   in  Svg.svg svgAttributes sceneElements
 
+renderObstacles : (Int,Int) -> List Obstacle.Model -> List (Svg Msg)
+renderObstacles windowSize =
+  List.map (\o -> App.map (\_ -> SubMsg) (Obstacle.view windowSize o))
 
 renderSky: (Int,Int) -> Svg Msg
 renderSky (w, h) =

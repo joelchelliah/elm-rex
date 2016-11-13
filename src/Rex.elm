@@ -41,8 +41,8 @@ update msg model =
     Jump -> if isJumping
             then model
             else { model | state = Jumping
-                         , yPos  = -1
-                         , yVel  = -1 }
+                         , yPos  = -1.2
+                         , yVel  = -1.2 }
     Duck -> if isJumping
             then model
             else { model | state = Ducking }
