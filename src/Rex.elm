@@ -33,32 +33,36 @@ type Msg = Run
 
 update : Msg -> Model -> Model
 update msg model =
-  case msg of
-    Run  -> if model.state == Jumping
+  let isJumping = model.state == Jumping
+  in case msg of
+    Run  -> if isJumping
             then model
             else { model | state = Running }
-    Jump -> { model | state = Jumping
-                    }
-    Duck -> { model | state = Ducking
-                    }
+    Jump -> if isJumping
+            then model
+            else { model | state = Jumping
+                         , yPos  = -1
+                         , yVel  = -1 }
+    Duck -> if isJumping
+            then model
+            else { model | state = Ducking }
     Kill -> model
 
-    Tick delta -> move delta model
+    Tick delta -> if isJumping
+                  then move delta model
+                  else model
 
 move : Time -> Model -> Model
 move delta ({yPos, yVel} as model) =
-  let (state', yPos', yVel') = if yPos >= 0
+  let gravity = 0.005
+      (state', yPos', yVel') = if yPos >= 0
                                then (Running, 0, 0)
-                               else (Jumping, yPos + yVel * delta, yVel)
+                               else (Jumping, yPos + yVel * delta, yVel + gravity * delta)
   in { model | yPos = yPos'
              , yVel = yVel'
              , state = state' }
 
-fly : Time -> Float -> Float -> (Float,Float)
-fly delta y vy = (y + vy * delta, vy)
 
-fall : Time -> Float -> Float -> (Float,Float)
-fall delta y vy = (y + vy * delta, vy)
 
 
 -- View
@@ -66,7 +70,7 @@ fall delta y vy = (y + vy * delta, vy)
 view : (Int,Int) -> Model -> Svg Msg
 view (w, h) rex =
   let x' = 50 |> toString
-      y' = h - 110 |> toString
+      y' = (toFloat h) - 110 + (rex.yPos) |> toString
   in  Svg.image [ x x'
                 , y y'
                 , width "100"

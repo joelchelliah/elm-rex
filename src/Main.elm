@@ -4,12 +4,13 @@ import Html exposing (Html, div)
 import Html.App as App
 import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
-import Time exposing (Time, millisecond)
+import Time exposing (Time)
 import Keyboard exposing (KeyCode)
 import Char exposing (fromCode)
 import String exposing (fromChar)
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, fill, fontFamily, textAnchor, xlinkHref)
+import AnimationFrame
 
 
 main = App.program { init = init
@@ -22,11 +23,10 @@ main = App.program { init = init
 
 type alias Model = { rex: Rex.Model
                    , obstacles: List String
-                   , time: Time
                    }
 
 init : (Model, Cmd Msg)
-init = (Model Rex.init [] 0, Cmd.none)
+init = (Model Rex.init [], Cmd.none)
 
 
 -- Update
@@ -56,7 +56,7 @@ codeToMsg code =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-  Sub.batch [ Time.every 1000 Tick
+  Sub.batch [ AnimationFrame.diffs Tick
             , Keyboard.downs KeyPressed
             , Keyboard.ups (\_ -> KeyReleased)
             ]
