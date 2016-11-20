@@ -11,6 +11,8 @@ import Time exposing (Time)
 type alias Model = { state : State
                    , yPos: Float
                    , yVel: Float
+                   , width: Int
+                   , height: Int
                    }
 
 type State = Idle
@@ -20,7 +22,7 @@ type State = Idle
            | Dead
 
 init : Model
-init = Model Idle 0 0
+init = Model Idle 0 0 92 84
 
 
 -- Update
@@ -67,25 +69,25 @@ move delta ({yPos, yVel} as model) =
 
 -- View
 
-view : (Int,Int) -> Model -> Svg Msg
+view : (Int, Int) -> Model -> Svg Msg
 view (w, h) rex =
   let x' = 50 |> toString
       y' = (toFloat h) - 110 + (rex.yPos) |> toString
   in  Svg.image [ x x'
                 , y y'
-                , width "100"
-                , height "100"
+                , width <| toString rex.width
+                , height <| toString rex.height
                 , xlinkHref <| render rex
                 ]
                 []
 
 render: Model -> String
 render {state} = case state of
-    Idle    -> "images/idle.jpg"
-    Running -> "images/idle.jpg"
-    Jumping -> "images/idle.jpg"
-    Ducking -> "images/duck.jpg"
-    Dead    -> "images/idle.jpg"
+    Idle    -> "images/idle.png"
+    Running -> "images/run_1.png"
+    Jumping -> "images/jump.png"
+    Ducking -> "images/run_3.png"
+    Dead    -> "images/idle.png"
 
 
 -- Actions
