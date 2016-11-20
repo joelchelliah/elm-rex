@@ -10877,15 +10877,15 @@ var _joelchelliah$elm_rex$Rex$render = function (_p0) {
 	var _p2 = _p1.state;
 	switch (_p2.ctor) {
 		case 'Idle':
-			return 'images/idle.jpg';
+			return 'images/idle.png';
 		case 'Running':
-			return 'images/idle.jpg';
+			return 'images/run_1.png';
 		case 'Jumping':
-			return 'images/idle.jpg';
+			return 'images/jump.png';
 		case 'Ducking':
-			return 'images/duck.jpg';
+			return 'images/run_3.png';
 		default:
-			return 'images/idle.jpg';
+			return 'images/idle.png';
 	}
 };
 var _joelchelliah$elm_rex$Rex$view = F2(
@@ -10900,17 +10900,19 @@ var _joelchelliah$elm_rex$Rex$view = F2(
 				[
 					_elm_lang$svg$Svg_Attributes$x(x$),
 					_elm_lang$svg$Svg_Attributes$y(y$),
-					_elm_lang$svg$Svg_Attributes$width('100'),
-					_elm_lang$svg$Svg_Attributes$height('100'),
+					_elm_lang$svg$Svg_Attributes$width(
+					_elm_lang$core$Basics$toString(rex.width)),
+					_elm_lang$svg$Svg_Attributes$height(
+					_elm_lang$core$Basics$toString(rex.height)),
 					_elm_lang$svg$Svg_Attributes$xlinkHref(
 					_joelchelliah$elm_rex$Rex$render(rex))
 				]),
 			_elm_lang$core$Native_List.fromArray(
 				[]));
 	});
-var _joelchelliah$elm_rex$Rex$Model = F3(
-	function (a, b, c) {
-		return {state: a, yPos: b, yVel: c};
+var _joelchelliah$elm_rex$Rex$Model = F5(
+	function (a, b, c, d, e) {
+		return {state: a, yPos: b, yVel: c, width: d, height: e};
 	});
 var _joelchelliah$elm_rex$Rex$Dead = {ctor: 'Dead'};
 var _joelchelliah$elm_rex$Rex$Ducking = {ctor: 'Ducking'};
@@ -10954,7 +10956,7 @@ var _joelchelliah$elm_rex$Rex$update = F2(
 		}
 	});
 var _joelchelliah$elm_rex$Rex$Idle = {ctor: 'Idle'};
-var _joelchelliah$elm_rex$Rex$init = A3(_joelchelliah$elm_rex$Rex$Model, _joelchelliah$elm_rex$Rex$Idle, 0, 0);
+var _joelchelliah$elm_rex$Rex$init = A5(_joelchelliah$elm_rex$Rex$Model, _joelchelliah$elm_rex$Rex$Idle, 0, 0, 92, 84);
 var _joelchelliah$elm_rex$Rex$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
