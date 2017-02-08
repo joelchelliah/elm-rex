@@ -13,6 +13,8 @@ type alias Model = { state : State
                    , yVel: Float
                    , width: Int
                    , height: Int
+                   , runCounter : Int
+                   , runIncs : List Int
                    }
 
 type State = Idle
@@ -22,7 +24,11 @@ type State = Idle
            | Dead
 
 init : Model
-init = Model Idle 0 0 92 84
+init =
+  let (w, h) = (92, 84)
+      runCounter = 1
+      runIncs = [1, 0, 0]
+  in Model Idle 0 0 w h runCounter runIncs
 
 
 -- Update
@@ -36,10 +42,11 @@ type Msg = Run
 update : Msg -> Model -> Model
 update msg model =
   let isJumping = model.state == Jumping
+      isRunning = model.state == Running
   in case msg of
     Run  -> if isJumping
             then model
-            else { model | state = Running }
+            else running model
     Jump -> if isJumping
             then model
             else { model | state = Jumping
@@ -52,7 +59,9 @@ update msg model =
 
     Tick delta -> if isJumping
                   then move delta model
-                  else model
+                  else if isRunning
+                       then running model
+                       else model
 
 move : Time -> Model -> Model
 move delta ({yPos, yVel} as model) =
@@ -64,7 +73,13 @@ move delta ({yPos, yVel} as model) =
              , yVel = yVel_
              , state = state_ }
 
-
+running : Model -> Model
+running model =
+  let headInc = Maybe.withDefault 0 (List.head model.runIncs)
+      restInc = List.drop 1 model.runIncs
+  in { model | state = Running
+             , runCounter = model.runCounter + headInc
+             , runIncs = restInc ++ [headInc]}
 
 
 -- View
@@ -82,9 +97,9 @@ view (w, h) rex =
                 []
 
 render: Model -> String
-render {state} = case state of
+render {state, runCounter} = case state of
     Idle    -> "images/idle.png"
-    Running -> "images/run_1.png"
+    Running -> "images/run_" ++ (toString (runCounter % 5 + 1)) ++ ".png"
     Jumping -> "images/jump.png"
     Ducking -> "images/run_3.png"
     Dead    -> "images/idle.png"
