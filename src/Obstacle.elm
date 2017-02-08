@@ -2,8 +2,8 @@ module Obstacle exposing ( Model, init, update, view)
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
-import Element exposing (Element)
-import Time exposing (Time)
+--import Element exposing (Element)
+--import Time exposing (Time)
 
 -- Model
 
@@ -29,10 +29,10 @@ update delta ({xPos, xVel} as model) =
 
 view : (Int,Int) -> Model -> Svg Msg
 view (w, h) model =
-  let x' = model.xPos |> toString
-      y' = (toFloat h) - 110 + (model.yPos) |> toString
-  in  Svg.image [ x x'
-                , y y'
+  let x_ = model.xPos |> toString
+      y_ = (toFloat h) - 110 + (model.yPos) |> toString
+  in  Svg.image [ x x_
+                , y y_
                 , width "100"
                 , height "100"
                 , xlinkHref "images/cactus_1.png"

@@ -1,24 +1,23 @@
 import Rex
 import Obstacle
 
-import Html exposing (Html, div)
-import Html.App as App
-import Html.Attributes exposing (id, class)
-import Html.Events exposing (onClick)
+import Html exposing (Html, div, program, map)
+--import Html.Attributes exposing (id, class)
+--import Html.Events exposing (onClick)
 import Time exposing (Time)
 import Keyboard exposing (KeyCode)
-import Char exposing (fromCode)
-import String exposing (fromChar)
+--import Char exposing (fromCode)
+--import String exposing (fromChar)
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, fill, fontFamily, textAnchor, xlinkHref)
 import AnimationFrame
 
-
-main = App.program { init = init
-                   , view = view
-                   , update = update
-                   , subscriptions = subscriptions
-                   }
+main : Program Never Model Msg
+main = program { init = init
+               , view = view
+               , update = update
+               , subscriptions = subscriptions
+               }
 
 -- Model
 
@@ -91,14 +90,14 @@ view ({rex, obstacles} as model) =
                       ]
       sceneElements = [ renderSky windowSize
                       , renderGround windowSize
-                      , App.map (\_ -> SubMsg) (Rex.view windowSize rex)
+                      , map (\_ -> SubMsg) (Rex.view windowSize rex)
                       ] ++ (renderObstacles windowSize obstacles)
 
   in  Svg.svg svgAttributes sceneElements
 
 renderObstacles : (Int,Int) -> List Obstacle.Model -> List (Svg Msg)
 renderObstacles windowSize =
-  List.map (\o -> App.map (\_ -> SubMsg) (Obstacle.view windowSize o))
+  List.map (\o -> map (\_ -> SubMsg) (Obstacle.view windowSize o))
 
 renderSky: (Int,Int) -> Svg Msg
 renderSky (w, h) =
@@ -111,10 +110,10 @@ renderSky (w, h) =
 
 renderGround: (Int,Int) -> Svg Msg
 renderGround (w, h) =
-  let y' = h - 5 |> toString
+  let y_ = h - 5 |> toString
   in  Svg.rect [ fill "#811"
                , x "0"
-               , y y'
+               , y y_
                , width (toString w)
                , height (toString h)
                ]

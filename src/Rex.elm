@@ -3,7 +3,7 @@ module Rex exposing ( Model, Msg(..), init, update, view,
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
-import Element exposing (Element)
+--import Element exposing (Element)
 import Time exposing (Time)
 
 -- Model
@@ -57,12 +57,12 @@ update msg model =
 move : Time -> Model -> Model
 move delta ({yPos, yVel} as model) =
   let gravity = 0.005
-      (state', yPos', yVel') = if yPos >= 0
+      (state_, yPos_, yVel_) = if yPos >= 0
                                then (Running, 0, 0)
                                else (Jumping, yPos + yVel * delta, yVel + gravity * delta)
-  in { model | yPos = yPos'
-             , yVel = yVel'
-             , state = state' }
+  in { model | yPos = yPos_
+             , yVel = yVel_
+             , state = state_ }
 
 
 
@@ -71,10 +71,10 @@ move delta ({yPos, yVel} as model) =
 
 view : (Int, Int) -> Model -> Svg Msg
 view (w, h) rex =
-  let x' = 50 |> toString
-      y' = (toFloat h) - 110 + (rex.yPos) |> toString
-  in  Svg.image [ x x'
-                , y y'
+  let x_ = 50 |> toString
+      y_ = (toFloat h) - 110 + (rex.yPos) |> toString
+  in  Svg.image [ x x_
+                , y y_
                 , width <| toString rex.width
                 , height <| toString rex.height
                 , xlinkHref <| render rex
