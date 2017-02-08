@@ -13,7 +13,7 @@ type alias Model = { state : State
                    , yVel: Float
                    , width: Int
                    , height: Int
-                   , runCounter : Int
+                   , runCount : Int
                    , runIncs : List Int
                    }
 
@@ -26,9 +26,9 @@ type State = Idle
 init : Model
 init =
   let (w, h) = (92, 84)
-      runCounter = 1
+      runCount = 1
       runIncs = [1, 0, 0]
-  in Model Idle 0 0 w h runCounter runIncs
+  in Model Idle 0 0 w h runCount runIncs
 
 
 -- Update
@@ -78,7 +78,7 @@ running model =
   let headInc = Maybe.withDefault 0 (List.head model.runIncs)
       restInc = List.drop 1 model.runIncs
   in { model | state = Running
-             , runCounter = model.runCounter + headInc
+             , runCount = model.runCount + headInc
              , runIncs = restInc ++ [headInc]}
 
 
@@ -97,10 +97,13 @@ view (w, h) rex =
                 []
 
 render: Model -> String
-render {state, runCounter} = case state of
+render {state, yVel, runCount} =
+  let runI = toString <| runCount % 5
+      jumpI = toString <| if yVel < 0 then 0 else 1
+  in case state of
     Idle    -> "images/idle.png"
-    Running -> "images/run_" ++ (toString (runCounter % 5 + 1)) ++ ".png"
-    Jumping -> "images/jump.png"
+    Running -> "images/run_" ++ runI ++ ".png"
+    Jumping -> "images/jump_" ++ jumpI ++ ".png"
     Ducking -> "images/run_3.png"
     Dead    -> "images/idle.png"
 
