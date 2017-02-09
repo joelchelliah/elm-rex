@@ -98,7 +98,7 @@ view (w, h) rex =
 
 render: Model -> String
 render {state, yVel, runCount} =
-  let runI = toString <| runCount % 5
+  let runI = toString <| runCount % 6
       jumpI = toString <| if yVel < 0 then 0 else 1
   in case state of
     Idle    -> "images/idle.png"
