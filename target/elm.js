@@ -9072,12 +9072,87 @@ var _elm_lang$svg$Svg_Attributes$accumulate = _elm_lang$virtual_dom$VirtualDom$a
 var _elm_lang$svg$Svg_Attributes$accelerate = _elm_lang$virtual_dom$VirtualDom$attribute('accelerate');
 var _elm_lang$svg$Svg_Attributes$accentHeight = _elm_lang$virtual_dom$VirtualDom$attribute('accent-height');
 
+var _joelchelliah$elm_rex$MovingElement$scrollSpeed = -0.4;
+var _joelchelliah$elm_rex$MovingElement$view = F2(
+	function (_p0, model) {
+		var _p1 = _p0;
+		var _p2 = {ctor: '_Tuple2', _0: 0, _1: _p1._1 - 100};
+		var offsetX = _p2._0;
+		var offsetY = _p2._1;
+		var x_ = _elm_lang$core$Basics$toString(offsetX + model.xPos);
+		var y_ = _elm_lang$core$Basics$toString(offsetY - model.yPos);
+		return A2(
+			_elm_lang$svg$Svg$image,
+			{
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$x(x_),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$svg$Svg_Attributes$y(y_),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$width(
+							_elm_lang$core$Basics$toString(model.width)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$height(
+								_elm_lang$core$Basics$toString(model.height)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$xlinkHref(model.img),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			},
+			{ctor: '[]'});
+	});
+var _joelchelliah$elm_rex$MovingElement$update = F2(
+	function (delta, _p3) {
+		var _p4 = _p3;
+		return _elm_lang$core$Native_Utils.update(
+			_p4,
+			{xPos: _p4.xPos + (_p4.xVel * delta)});
+	});
+var _joelchelliah$elm_rex$MovingElement$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {xPos: a, yPos: b, xVel: c, width: d, height: e, img: f};
+	});
+var _joelchelliah$elm_rex$MovingElement$init = F5(
+	function (xPos, yPos, w, h, img) {
+		return A6(_joelchelliah$elm_rex$MovingElement$Model, xPos, yPos, _joelchelliah$elm_rex$MovingElement$scrollSpeed, w, h, img);
+	});
+var _joelchelliah$elm_rex$MovingElement$Tick = function (a) {
+	return {ctor: 'Tick', _0: a};
+};
+
+var _joelchelliah$elm_rex$Cactus$view = _joelchelliah$elm_rex$MovingElement$view;
+var _joelchelliah$elm_rex$Cactus$update = _joelchelliah$elm_rex$MovingElement$update;
+var _joelchelliah$elm_rex$Cactus$init = function (x) {
+	var img = 'images/cactus_1.png';
+	var y = 50;
+	var _p0 = {ctor: '_Tuple2', _0: 100, _1: 100};
+	var w = _p0._0;
+	var h = _p0._1;
+	return A5(_joelchelliah$elm_rex$MovingElement$init, x, y, w, h, img);
+};
+
+var _joelchelliah$elm_rex$GroundTile$size = {width: 400, height: 100};
+var _joelchelliah$elm_rex$GroundTile$h = _joelchelliah$elm_rex$GroundTile$size.height;
+var _joelchelliah$elm_rex$GroundTile$w = _joelchelliah$elm_rex$GroundTile$size.width;
+var _joelchelliah$elm_rex$GroundTile$view = _joelchelliah$elm_rex$MovingElement$view;
+var _joelchelliah$elm_rex$GroundTile$update = _joelchelliah$elm_rex$MovingElement$update;
+var _joelchelliah$elm_rex$GroundTile$init = function (x) {
+	return A5(_joelchelliah$elm_rex$MovingElement$init, x, 0, _joelchelliah$elm_rex$GroundTile$w, _joelchelliah$elm_rex$GroundTile$h, 'images/ground.png');
+};
+
 var _joelchelliah$elm_rex$Rex$render = function (_p0) {
 	var _p1 = _p0;
 	var jumpI = _elm_lang$core$Basics$toString(
 		(_elm_lang$core$Native_Utils.cmp(_p1.yVel, 0) < 0) ? 0 : 1);
 	var runI = _elm_lang$core$Basics$toString(
-		A2(_elm_lang$core$Basics_ops['%'], _p1.runCount, 5));
+		A2(_elm_lang$core$Basics_ops['%'], _p1.runCount, 6));
 	var _p2 = _p1.state;
 	switch (_p2.ctor) {
 		case 'Idle':
@@ -9101,9 +9176,12 @@ var _joelchelliah$elm_rex$Rex$render = function (_p0) {
 var _joelchelliah$elm_rex$Rex$view = F2(
 	function (_p3, rex) {
 		var _p4 = _p3;
+		var _p5 = {ctor: '_Tuple2', _0: 50, _1: _p4._1 - 60};
+		var offsetX = _p5._0;
+		var offsetY = _p5._1;
+		var x_ = _elm_lang$core$Basics$toString(offsetX);
 		var y_ = _elm_lang$core$Basics$toString(
-			(_elm_lang$core$Basics$toFloat(_p4._1) - 110) + rex.yPos);
-		var x_ = _elm_lang$core$Basics$toString(50);
+			(offsetY - _elm_lang$core$Basics$toFloat(rex.height)) + rex.yPos);
 		return A2(
 			_elm_lang$svg$Svg$image,
 			{
@@ -9141,17 +9219,17 @@ var _joelchelliah$elm_rex$Rex$Ducking = {ctor: 'Ducking'};
 var _joelchelliah$elm_rex$Rex$Jumping = {ctor: 'Jumping'};
 var _joelchelliah$elm_rex$Rex$Running = {ctor: 'Running'};
 var _joelchelliah$elm_rex$Rex$move = F2(
-	function (delta, _p5) {
-		var _p6 = _p5;
-		var _p9 = _p6.yVel;
-		var _p8 = _p6.yPos;
+	function (delta, _p6) {
+		var _p7 = _p6;
+		var _p10 = _p7.yVel;
+		var _p9 = _p7.yPos;
 		var gravity = 5.0e-3;
-		var _p7 = (_elm_lang$core$Native_Utils.cmp(_p8, 0) > -1) ? {ctor: '_Tuple3', _0: _joelchelliah$elm_rex$Rex$Running, _1: 0, _2: 0} : {ctor: '_Tuple3', _0: _joelchelliah$elm_rex$Rex$Jumping, _1: _p8 + (_p9 * delta), _2: _p9 + (gravity * delta)};
-		var state_ = _p7._0;
-		var yPos_ = _p7._1;
-		var yVel_ = _p7._2;
+		var _p8 = (_elm_lang$core$Native_Utils.cmp(_p9, 0) > -1) ? {ctor: '_Tuple3', _0: _joelchelliah$elm_rex$Rex$Running, _1: 0, _2: 0} : {ctor: '_Tuple3', _0: _joelchelliah$elm_rex$Rex$Jumping, _1: _p9 + (_p10 * delta), _2: _p10 + (gravity * delta)};
+		var state_ = _p8._0;
+		var yPos_ = _p8._1;
+		var yVel_ = _p8._2;
 		return _elm_lang$core$Native_Utils.update(
-			_p6,
+			_p7,
 			{yPos: yPos_, yVel: yVel_, state: state_});
 	});
 var _joelchelliah$elm_rex$Rex$running = function (model) {
@@ -9179,8 +9257,8 @@ var _joelchelliah$elm_rex$Rex$update = F2(
 	function (msg, model) {
 		var isRunning = _elm_lang$core$Native_Utils.eq(model.state, _joelchelliah$elm_rex$Rex$Running);
 		var isJumping = _elm_lang$core$Native_Utils.eq(model.state, _joelchelliah$elm_rex$Rex$Jumping);
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p11 = msg;
+		switch (_p11.ctor) {
 			case 'Run':
 				return isJumping ? model : _joelchelliah$elm_rex$Rex$running(model);
 			case 'Jump':
@@ -9194,7 +9272,7 @@ var _joelchelliah$elm_rex$Rex$update = F2(
 			case 'Kill':
 				return model;
 			default:
-				return isJumping ? A2(_joelchelliah$elm_rex$Rex$move, _p10._0, model) : (isRunning ? _joelchelliah$elm_rex$Rex$running(model) : model);
+				return isJumping ? A2(_joelchelliah$elm_rex$Rex$move, _p11._0, model) : (isRunning ? _joelchelliah$elm_rex$Rex$running(model) : model);
 		}
 	});
 var _joelchelliah$elm_rex$Rex$Idle = {ctor: 'Idle'};
@@ -9213,9 +9291,9 @@ var _joelchelliah$elm_rex$Rex$init = function () {
 		}
 	};
 	var runCount = 1;
-	var _p11 = {ctor: '_Tuple2', _0: 92, _1: 84};
-	var w = _p11._0;
-	var h = _p11._1;
+	var _p12 = {ctor: '_Tuple2', _0: 92, _1: 84};
+	var w = _p12._0;
+	var h = _p12._1;
 	return A7(_joelchelliah$elm_rex$Rex$Model, _joelchelliah$elm_rex$Rex$Idle, 0, 0, w, h, runCount, runIncs);
 }();
 var _joelchelliah$elm_rex$Rex$Tick = function (a) {
@@ -9229,64 +9307,15 @@ var _joelchelliah$elm_rex$Rex$jump = _joelchelliah$elm_rex$Rex$Jump;
 var _joelchelliah$elm_rex$Rex$Run = {ctor: 'Run'};
 var _joelchelliah$elm_rex$Rex$run = _joelchelliah$elm_rex$Rex$Run;
 
-var _joelchelliah$elm_rex$Obstacle$view = F2(
-	function (_p0, model) {
-		var _p1 = _p0;
-		var y_ = _elm_lang$core$Basics$toString(
-			(_elm_lang$core$Basics$toFloat(_p1._1) - 110) + model.yPos);
-		var x_ = _elm_lang$core$Basics$toString(model.xPos);
-		return A2(
-			_elm_lang$svg$Svg$image,
-			{
-				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$x(x_),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$y(y_),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width('100'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height('100'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$svg$Svg_Attributes$xlinkHref('images/cactus_1.png'),
-								_1: {ctor: '[]'}
-							}
-						}
-					}
-				}
-			},
-			{ctor: '[]'});
-	});
-var _joelchelliah$elm_rex$Obstacle$update = F2(
-	function (delta, _p2) {
-		var _p3 = _p2;
-		return _elm_lang$core$Native_Utils.update(
-			_p3,
-			{xPos: _p3.xPos + (_p3.xVel * delta)});
-	});
-var _joelchelliah$elm_rex$Obstacle$Model = F3(
-	function (a, b, c) {
-		return {xPos: a, yPos: b, xVel: c};
-	});
-var _joelchelliah$elm_rex$Obstacle$init = function (x) {
-	return A3(_joelchelliah$elm_rex$Obstacle$Model, x, 0, -0.4);
-};
-var _joelchelliah$elm_rex$Obstacle$Tick = function (a) {
-	return {ctor: 'Tick', _0: a};
-};
-
-var _joelchelliah$elm_rex$Main$renderGround = function (_p0) {
+var _joelchelliah$elm_rex$Main$window = {width: 1400, height: 400};
+var _joelchelliah$elm_rex$Main$renderBackupGround = function (_p0) {
 	var _p1 = _p0;
-	var _p2 = _p1._1;
-	var y_ = _elm_lang$core$Basics$toString(_p2 - 5);
+	var y_ = _elm_lang$core$Basics$toString(_joelchelliah$elm_rex$Main$window.height - 86);
 	return A2(
 		_elm_lang$svg$Svg$rect,
 		{
 			ctor: '::',
-			_0: _elm_lang$svg$Svg_Attributes$fill('#811'),
+			_0: _elm_lang$svg$Svg_Attributes$fill('#C18C57'),
 			_1: {
 				ctor: '::',
 				_0: _elm_lang$svg$Svg_Attributes$x('0'),
@@ -9300,7 +9329,7 @@ var _joelchelliah$elm_rex$Main$renderGround = function (_p0) {
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_p2)),
+								_elm_lang$core$Basics$toString(_p1._1)),
 							_1: {ctor: '[]'}
 						}
 					}
@@ -9309,8 +9338,8 @@ var _joelchelliah$elm_rex$Main$renderGround = function (_p0) {
 		},
 		{ctor: '[]'});
 };
-var _joelchelliah$elm_rex$Main$renderSky = function (_p3) {
-	var _p4 = _p3;
+var _joelchelliah$elm_rex$Main$renderSky = function (_p2) {
+	var _p3 = _p2;
 	return A2(
 		_elm_lang$svg$Svg$rect,
 		{
@@ -9325,11 +9354,11 @@ var _joelchelliah$elm_rex$Main$renderSky = function (_p3) {
 					_1: {
 						ctor: '::',
 						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(_p4._0)),
+							_elm_lang$core$Basics$toString(_p3._0)),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_p4._1)),
+								_elm_lang$core$Basics$toString(_p3._1)),
 							_1: {ctor: '[]'}
 						}
 					}
@@ -9339,8 +9368,8 @@ var _joelchelliah$elm_rex$Main$renderSky = function (_p3) {
 		{ctor: '[]'});
 };
 var _joelchelliah$elm_rex$Main$codeToMsg = function (code) {
-	var _p5 = code;
-	switch (_p5) {
+	var _p4 = code;
+	switch (_p4) {
 		case 40:
 			return _joelchelliah$elm_rex$Rex$Duck;
 		case 38:
@@ -9349,22 +9378,42 @@ var _joelchelliah$elm_rex$Main$codeToMsg = function (code) {
 			return _joelchelliah$elm_rex$Rex$Run;
 	}
 };
-var _joelchelliah$elm_rex$Main$moveObstacles = F2(
-	function (delta, obstacles) {
-		var _p6 = obstacles;
-		if (_p6.ctor === '[]') {
+var _joelchelliah$elm_rex$Main$moveGround = F2(
+	function (delta, ground) {
+		var _p5 = ground;
+		if (_p5.ctor === '[]') {
 			return {ctor: '[]'};
 		} else {
-			var _p8 = _p6._1;
-			var _p7 = _p6._0;
-			return (_elm_lang$core$Native_Utils.cmp(_p7.xPos, 0) < 0) ? {
+			var _p6 = _p5._0;
+			var moveTail = A2(_joelchelliah$elm_rex$Main$moveGround, delta, _p5._1);
+			var errorMargin = 10;
+			return (_elm_lang$core$Native_Utils.cmp(_p6.xPos, 0 - _p6.width) < 0) ? {
 				ctor: '::',
-				_0: _joelchelliah$elm_rex$Obstacle$init(900),
-				_1: A2(_joelchelliah$elm_rex$Main$moveObstacles, delta, _p8)
+				_0: _joelchelliah$elm_rex$GroundTile$init(_joelchelliah$elm_rex$Main$window.width - errorMargin),
+				_1: moveTail
 			} : {
 				ctor: '::',
-				_0: A2(_joelchelliah$elm_rex$Obstacle$update, delta, _p7),
-				_1: A2(_joelchelliah$elm_rex$Main$moveObstacles, delta, _p8)
+				_0: A2(_joelchelliah$elm_rex$GroundTile$update, delta, _p6),
+				_1: moveTail
+			};
+		}
+	});
+var _joelchelliah$elm_rex$Main$moveCacti = F2(
+	function (delta, cacti) {
+		var _p7 = cacti;
+		if (_p7.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			var _p8 = _p7._0;
+			var moveTail = A2(_joelchelliah$elm_rex$Main$moveCacti, delta, _p7._1);
+			return (_elm_lang$core$Native_Utils.cmp(_p8.xPos, 0 - _p8.width) < 0) ? {
+				ctor: '::',
+				_0: _joelchelliah$elm_rex$Cactus$init(_joelchelliah$elm_rex$Main$window.width),
+				_1: moveTail
+			} : {
+				ctor: '::',
+				_0: A2(_joelchelliah$elm_rex$Cactus$update, delta, _p8),
+				_1: moveTail
 			};
 		}
 	});
@@ -9406,7 +9455,8 @@ var _joelchelliah$elm_rex$Main$update = F2(
 								_joelchelliah$elm_rex$Rex$update,
 								_joelchelliah$elm_rex$Rex$Tick(_p10),
 								model.rex),
-							obstacles: A2(_joelchelliah$elm_rex$Main$moveObstacles, _p10, model.obstacles)
+							cacti: A2(_joelchelliah$elm_rex$Main$moveCacti, _p10, model.cacti),
+							ground: A2(_joelchelliah$elm_rex$Main$moveGround, _p10, model.ground)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
@@ -9414,47 +9464,63 @@ var _joelchelliah$elm_rex$Main$update = F2(
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
-var _joelchelliah$elm_rex$Main$Model = F2(
-	function (a, b) {
-		return {rex: a, obstacles: b};
+var _joelchelliah$elm_rex$Main$Model = F3(
+	function (a, b, c) {
+		return {rex: a, cacti: b, ground: c};
 	});
 var _joelchelliah$elm_rex$Main$init = function () {
-	var obstacles = {
-		ctor: '::',
-		_0: _joelchelliah$elm_rex$Obstacle$init(400),
-		_1: {
+	var tilesX = A2(
+		_elm_lang$core$List$map,
+		function (_p11) {
+			return A2(
+				F2(
+					function (x, y) {
+						return x * y;
+					}),
+				_joelchelliah$elm_rex$GroundTile$w,
+				_elm_lang$core$Basics$toFloat(_p11));
+		},
+		A2(_elm_lang$core$List$range, 0, 5));
+	var ground = A2(_elm_lang$core$List$map, _joelchelliah$elm_rex$GroundTile$init, tilesX);
+	var cacti = A2(
+		_elm_lang$core$List$map,
+		_joelchelliah$elm_rex$Cactus$init,
+		{
 			ctor: '::',
-			_0: _joelchelliah$elm_rex$Obstacle$init(800),
+			_0: 300,
 			_1: {
 				ctor: '::',
-				_0: _joelchelliah$elm_rex$Obstacle$init(1000),
-				_1: {ctor: '[]'}
+				_0: 800,
+				_1: {
+					ctor: '::',
+					_0: 1100,
+					_1: {ctor: '[]'}
+				}
 			}
-		}
-	};
+		});
 	return {
 		ctor: '_Tuple2',
-		_0: A2(_joelchelliah$elm_rex$Main$Model, _joelchelliah$elm_rex$Rex$init, obstacles),
+		_0: A3(_joelchelliah$elm_rex$Main$Model, _joelchelliah$elm_rex$Rex$init, cacti, ground),
 		_1: _elm_lang$core$Platform_Cmd$none
 	};
 }();
 var _joelchelliah$elm_rex$Main$SubMsg = {ctor: 'SubMsg'};
-var _joelchelliah$elm_rex$Main$renderObstacles = function (windowSize) {
+var _joelchelliah$elm_rex$Main$renderElements = function (windowSize) {
 	return _elm_lang$core$List$map(
 		function (o) {
 			return A2(
 				_elm_lang$html$Html$map,
-				function (_p11) {
+				function (_p12) {
 					return _joelchelliah$elm_rex$Main$SubMsg;
 				},
-				A2(_joelchelliah$elm_rex$Obstacle$view, windowSize, o));
+				A2(_joelchelliah$elm_rex$MovingElement$view, windowSize, o));
 		});
 };
-var _joelchelliah$elm_rex$Main$view = function (_p12) {
-	var _p13 = _p12;
-	var _p14 = {ctor: '_Tuple2', _0: 800, _1: 300};
-	var w = _p14._0;
-	var h = _p14._1;
+var _joelchelliah$elm_rex$Main$view = function (_p13) {
+	var _p14 = _p13;
+	var _p15 = {ctor: '_Tuple2', _0: _joelchelliah$elm_rex$Main$window.width, _1: _joelchelliah$elm_rex$Main$window.height};
+	var w = _p15._0;
+	var h = _p15._1;
 	var windowSize = {ctor: '_Tuple2', _0: w, _1: h};
 	var sceneElements = A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -9463,20 +9529,26 @@ var _joelchelliah$elm_rex$Main$view = function (_p12) {
 			_0: _joelchelliah$elm_rex$Main$renderSky(windowSize),
 			_1: {
 				ctor: '::',
-				_0: _joelchelliah$elm_rex$Main$renderGround(windowSize),
-				_1: {
+				_0: _joelchelliah$elm_rex$Main$renderBackupGround(windowSize),
+				_1: {ctor: '[]'}
+			}
+		},
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			A2(_joelchelliah$elm_rex$Main$renderElements, windowSize, _p14.ground),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				A2(_joelchelliah$elm_rex$Main$renderElements, windowSize, _p14.cacti),
+				{
 					ctor: '::',
 					_0: A2(
 						_elm_lang$html$Html$map,
-						function (_p15) {
+						function (_p16) {
 							return _joelchelliah$elm_rex$Main$SubMsg;
 						},
-						A2(_joelchelliah$elm_rex$Rex$view, windowSize, _p13.rex)),
+						A2(_joelchelliah$elm_rex$Rex$view, windowSize, _p14.rex)),
 					_1: {ctor: '[]'}
-				}
-			}
-		},
-		A2(_joelchelliah$elm_rex$Main$renderObstacles, windowSize, _p13.obstacles));
+				})));
 	var svgAttributes = {
 		ctor: '::',
 		_0: _elm_lang$svg$Svg_Attributes$width(
@@ -9519,7 +9591,7 @@ var _joelchelliah$elm_rex$Main$KeyPressed = function (a) {
 var _joelchelliah$elm_rex$Main$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
-var _joelchelliah$elm_rex$Main$subscriptions = function (_p16) {
+var _joelchelliah$elm_rex$Main$subscriptions = function (_p17) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
@@ -9530,7 +9602,7 @@ var _joelchelliah$elm_rex$Main$subscriptions = function (_p16) {
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$keyboard$Keyboard$ups(
-						function (_p17) {
+						function (_p18) {
 							return _joelchelliah$elm_rex$Main$KeyReleased;
 						}),
 					_1: {ctor: '[]'}
