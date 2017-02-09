@@ -9370,48 +9370,49 @@ var _joelchelliah$elm_rex$Main$renderSky = function (_p2) {
 var _joelchelliah$elm_rex$Main$renderMessage = F2(
 	function (_p4, state) {
 		var _p5 = _p4;
-		var _p6 = state;
-		if (_p6.ctor === 'Paused') {
-			var attrBase = {
+		var attrBase = {
+			ctor: '::',
+			_0: function (_p6) {
+				return _elm_lang$svg$Svg_Attributes$x(
+					_elm_lang$core$Basics$toString(_p6));
+			}(_p5._0 / 2),
+			_1: {
 				ctor: '::',
-				_0: function (_p7) {
-					return _elm_lang$svg$Svg_Attributes$x(
-						_elm_lang$core$Basics$toString(_p7));
-				}(_p5._0 / 2),
+				_0: _elm_lang$svg$Svg_Attributes$textAnchor('middle'),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$textAnchor('middle'),
+					_0: _elm_lang$svg$Svg_Attributes$fill('#C12'),
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+		var yMiddle = _p5._1 / 2;
+		var attrLarge = function (yPos) {
+			return A2(
+				_elm_lang$core$Basics_ops['++'],
+				{
+					ctor: '::',
+					_0: function (_p7) {
+						return _elm_lang$svg$Svg_Attributes$y(
+							_elm_lang$core$Basics$toString(_p7));
+					}(yMiddle + yPos),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$fill('#E24'),
+						_0: _elm_lang$svg$Svg_Attributes$fontSize('60'),
 						_1: {ctor: '[]'}
 					}
-				}
-			};
-			var yMiddle = _p5._1 / 2;
-			var attrLarge = A2(
+				},
+				attrBase);
+		};
+		var attrSmall = function (yPos) {
+			return A2(
 				_elm_lang$core$Basics_ops['++'],
 				{
 					ctor: '::',
 					_0: function (_p8) {
 						return _elm_lang$svg$Svg_Attributes$y(
 							_elm_lang$core$Basics$toString(_p8));
-					}(yMiddle - 20),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$fontSize('50'),
-						_1: {ctor: '[]'}
-					}
-				},
-				attrBase);
-			var attrSmall = A2(
-				_elm_lang$core$Basics_ops['++'],
-				{
-					ctor: '::',
-					_0: function (_p9) {
-						return _elm_lang$svg$Svg_Attributes$y(
-							_elm_lang$core$Basics$toString(_p9));
-					}(yMiddle + 15),
+					}(yMiddle + yPos),
 					_1: {
 						ctor: '::',
 						_0: _elm_lang$svg$Svg_Attributes$fontSize('18'),
@@ -9419,37 +9420,106 @@ var _joelchelliah$elm_rex$Main$renderMessage = F2(
 					}
 				},
 				attrBase);
-			return A2(
-				_elm_lang$svg$Svg$svg,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$svg$Svg$text_,
-						attrLarge,
-						{
-							ctor: '::',
-							_0: _elm_lang$svg$Svg$text('Paused'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
+		};
+		var _p9 = state;
+		switch (_p9.ctor) {
+			case 'New':
+				return A2(
+					_elm_lang$svg$Svg$svg,
+					{ctor: '[]'},
+					{
 						ctor: '::',
 						_0: A2(
 							_elm_lang$svg$Svg$text_,
-							attrSmall,
+							attrLarge(-50),
 							{
 								ctor: '::',
-								_0: _elm_lang$svg$Svg$text('Press SPACE to continue'),
+								_0: _elm_lang$svg$Svg$text('RAWЯ!'),
 								_1: {ctor: '[]'}
 							}),
-						_1: {ctor: '[]'}
-					}
-				});
-		} else {
-			return A2(
-				_elm_lang$svg$Svg$svg,
-				{ctor: '[]'},
-				{ctor: '[]'});
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$svg$Svg$text_,
+								attrSmall(0),
+								{
+									ctor: '::',
+									_0: _elm_lang$svg$Svg$text('Play using the arrow keys: ↑ ↓'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$svg$Svg$text_,
+									attrSmall(35),
+									{
+										ctor: '::',
+										_0: _elm_lang$svg$Svg$text('Press SPACE to pause'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
+					});
+			case 'Paused':
+				return A2(
+					_elm_lang$svg$Svg$svg,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$svg$Svg$text_,
+							attrLarge(-20),
+							{
+								ctor: '::',
+								_0: _elm_lang$svg$Svg$text('Paused!'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$svg$Svg$text_,
+								attrSmall(15),
+								{
+									ctor: '::',
+									_0: _elm_lang$svg$Svg$text('Press SPACE to continue'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					});
+			case 'End':
+				return A2(
+					_elm_lang$svg$Svg$svg,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$svg$Svg$text_,
+							attrLarge(-20),
+							{
+								ctor: '::',
+								_0: _elm_lang$svg$Svg$text('Game Ovər!'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$svg$Svg$text_,
+								attrSmall(15),
+								{
+									ctor: '::',
+									_0: _elm_lang$svg$Svg$text('Press SPACE to try again'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					});
+			default:
+				return A2(
+					_elm_lang$svg$Svg$svg,
+					{ctor: '[]'},
+					{ctor: '[]'});
 		}
 	});
 var _joelchelliah$elm_rex$Main$codeToMsg = function (code) {
@@ -9506,7 +9576,7 @@ var _joelchelliah$elm_rex$Main$Model = F4(
 	function (a, b, c, d) {
 		return {state: a, rex: b, cacti: c, ground: d};
 	});
-var _joelchelliah$elm_rex$Main$Paused = {ctor: 'Paused'};
+var _joelchelliah$elm_rex$Main$End = {ctor: 'End'};
 var _joelchelliah$elm_rex$Main$init = function () {
 	var tilesX = A2(
 		_elm_lang$core$List$map,
@@ -9539,10 +9609,11 @@ var _joelchelliah$elm_rex$Main$init = function () {
 		});
 	return {
 		ctor: '_Tuple2',
-		_0: A4(_joelchelliah$elm_rex$Main$Model, _joelchelliah$elm_rex$Main$Paused, _joelchelliah$elm_rex$Rex$init, cacti, ground),
+		_0: A4(_joelchelliah$elm_rex$Main$Model, _joelchelliah$elm_rex$Main$End, _joelchelliah$elm_rex$Rex$init, cacti, ground),
 		_1: _elm_lang$core$Platform_Cmd$none
 	};
 }();
+var _joelchelliah$elm_rex$Main$Paused = {ctor: 'Paused'};
 var _joelchelliah$elm_rex$Main$updatePlaying = F2(
 	function (msg, model) {
 		var _p16 = msg;
@@ -9599,20 +9670,21 @@ var _joelchelliah$elm_rex$Main$updatePaused = F2(
 var _joelchelliah$elm_rex$Main$update = F2(
 	function (msg, model) {
 		var _p19 = model.state;
-		if (_p19.ctor === 'Paused') {
-			return {
-				ctor: '_Tuple2',
-				_0: A2(_joelchelliah$elm_rex$Main$updatePaused, msg, model),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
-		} else {
+		if (_p19.ctor === 'Playing') {
 			return {
 				ctor: '_Tuple2',
 				_0: A2(_joelchelliah$elm_rex$Main$updatePlaying, msg, model),
 				_1: _elm_lang$core$Platform_Cmd$none
 			};
+		} else {
+			return {
+				ctor: '_Tuple2',
+				_0: A2(_joelchelliah$elm_rex$Main$updatePaused, msg, model),
+				_1: _elm_lang$core$Platform_Cmd$none
+			};
 		}
 	});
+var _joelchelliah$elm_rex$Main$New = {ctor: 'New'};
 var _joelchelliah$elm_rex$Main$SubMsg = {ctor: 'SubMsg'};
 var _joelchelliah$elm_rex$Main$renderElements = function (windowSize) {
 	return _elm_lang$core$List$map(
