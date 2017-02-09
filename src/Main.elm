@@ -1,13 +1,10 @@
 import Rex
-import Obstacle
+import Cactus
+import MovingElement as Elem
 
 import Html exposing (Html, div, program, map)
---import Html.Attributes exposing (id, class)
---import Html.Events exposing (onClick)
 import Time exposing (Time)
 import Keyboard exposing (KeyCode)
---import Char exposing (fromCode)
---import String exposing (fromChar)
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, fill, fontFamily, textAnchor, xlinkHref)
 import AnimationFrame
@@ -22,15 +19,15 @@ main = program { init = init
 -- Model
 
 type alias Model = { rex: Rex.Model
-                   , obstacles: List Obstacle.Model
+                   , cacti: List Cactus.Model
                    }
 
 init : (Model, Cmd Msg)
-init = let obstacles = [Obstacle.init 400
-                       ,Obstacle.init 800
-                       ,Obstacle.init 1000
-                       ]
-       in (Model Rex.init obstacles, Cmd.none)
+init = let cacti = [Cactus.init 400
+                   ,Cactus.init 800
+                   ,Cactus.init 1000
+                   ]
+       in (Model Rex.init cacti, Cmd.none)
 
 
 -- Update
@@ -46,17 +43,17 @@ update msg model =
     KeyPressed code -> ({model | rex = Rex.update (codeToMsg code) model.rex}, Cmd.none)
     KeyReleased     -> ({model | rex = Rex.update Rex.run model.rex}, Cmd.none)
     Tick delta      -> ({ model | rex = Rex.update (Rex.Tick delta) model.rex
-                                , obstacles = moveObstacles delta model.obstacles
+                                , cacti = moveCacti delta model.cacti
                                 }, Cmd.none)
     SubMsg          -> (model, Cmd.none)
 
 
-moveObstacles : Float -> List Obstacle.Model -> List Obstacle.Model
-moveObstacles delta obstacles = case obstacles of
+moveCacti : Float -> List Cactus.Model -> List Cactus.Model
+moveCacti delta cacti = case cacti of
   []   -> []
   h::t -> if h.xPos < 0
-          then Obstacle.init 900 :: moveObstacles delta t
-          else Obstacle.update delta h :: moveObstacles delta t
+          then Cactus.init 900 :: moveCacti delta t
+          else Cactus.update delta h :: moveCacti delta t
 
 codeToMsg : KeyCode -> Rex.Msg
 codeToMsg code =
@@ -78,7 +75,7 @@ subscriptions _ =
 -- View
 
 view : Model -> Html Msg
-view ({rex, obstacles} as model) =
+view ({rex, cacti} as model) =
   let (w, h) = (800, 300)
       windowSize = (w, h)
       svgAttributes = [ width (toString w)
@@ -91,13 +88,13 @@ view ({rex, obstacles} as model) =
       sceneElements = [ renderSky windowSize
                       , renderGround windowSize
                       , map (\_ -> SubMsg) (Rex.view windowSize rex)
-                      ] ++ (renderObstacles windowSize obstacles)
+                      ] ++ (renderElements windowSize cacti)
 
   in  Svg.svg svgAttributes sceneElements
 
-renderObstacles : (Int,Int) -> List Obstacle.Model -> List (Svg Msg)
-renderObstacles windowSize =
-  List.map (\o -> map (\_ -> SubMsg) (Obstacle.view windowSize o))
+renderElements : (Int,Int) -> List Elem.Model -> List (Svg Msg)
+renderElements windowSize =
+  List.map (\o -> map (\_ -> SubMsg) (Elem.view windowSize o))
 
 renderSky: (Int,Int) -> Svg Msg
 renderSky (w, h) =

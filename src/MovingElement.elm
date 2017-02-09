@@ -1,19 +1,22 @@
-module Obstacle exposing ( Model, init, update, view)
+module MovingElement exposing (Model, Msg, init, update, view)
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
---import Element exposing (Element)
---import Time exposing (Time)
+
 
 -- Model
 
 type alias Model = { xPos : Float
                    , yPos: Float
                    , xVel: Float
+                   , width: Int
+                   , height: Int
+                   , img: String
                    }
 
-init : Float -> Model
-init x = Model x 0 -0.4
+init : Float -> Float -> Int -> Int -> String -> Model
+init xPos yPos w h img =
+  Model xPos yPos -0.4 w h img
 
 
 -- Update
@@ -33,8 +36,8 @@ view (w, h) model =
       y_ = (toFloat h) - 110 + (model.yPos) |> toString
   in  Svg.image [ x x_
                 , y y_
-                , width "100"
-                , height "100"
-                , xlinkHref "images/cactus_1.png"
+                , width <| toString model.width
+                , height <| toString model.height
+                , xlinkHref model.img
                 ]
                 []
