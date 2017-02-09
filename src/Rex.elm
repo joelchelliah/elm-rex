@@ -84,10 +84,11 @@ running model =
 
 -- View
 
-view : (Int, Int) -> Model -> Svg Msg
-view (w, h) rex =
-  let x_ = 50 |> toString
-      y_ = (toFloat h) - 110 + (rex.yPos) |> toString
+view : (Float, Float) -> Model -> Svg Msg
+view (_, windowH) rex =
+  let (offsetX, offsetY) = (50, windowH - 60)
+      x_ = offsetX |> toString
+      y_ = offsetY - (toFloat rex.height) + rex.yPos |> toString
   in  Svg.image [ x x_
                 , y y_
                 , width <| toString rex.width

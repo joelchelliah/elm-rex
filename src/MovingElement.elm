@@ -9,14 +9,14 @@ import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
 type alias Model = { xPos : Float
                    , yPos: Float
                    , xVel: Float
-                   , width: Int
-                   , height: Int
+                   , width: Float
+                   , height: Float
                    , img: String
                    }
 
-init : Float -> Float -> Int -> Int -> String -> Model
+init : Float -> Float -> Float -> Float -> String -> Model
 init xPos yPos w h img =
-  Model xPos yPos -0.4 w h img
+  Model xPos yPos scrollSpeed w h img
 
 
 -- Update
@@ -30,10 +30,11 @@ update delta ({xPos, xVel} as model) =
 
 -- View
 
-view : (Int,Int) -> Model -> Svg Msg
-view (w, h) model =
-  let x_ = model.xPos |> toString
-      y_ = (toFloat h) - 110 + (model.yPos) |> toString
+view : (Float, Float) -> Model -> Svg Msg
+view (_, windowH) model =
+  let (offsetX, offsetY) = (0, windowH - 100)
+      x_ = offsetX + model.xPos |> toString
+      y_ = offsetY - model.yPos |> toString
   in  Svg.image [ x x_
                 , y y_
                 , width <| toString model.width
@@ -41,3 +42,7 @@ view (w, h) model =
                 , xlinkHref model.img
                 ]
                 []
+
+
+scrollSpeed : Float
+scrollSpeed = -0.4
