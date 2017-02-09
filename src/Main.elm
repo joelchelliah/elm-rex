@@ -7,7 +7,7 @@ import Html exposing (Html, div, program, map)
 import Time exposing (Time)
 import Keyboard exposing (KeyCode)
 import Svg exposing (Svg, Attribute)
-import Svg.Attributes as Attributes exposing (x, y, width, height, fill, fontFamily, textAnchor, xlinkHref)
+import Svg.Attributes as Attributes exposing (x, y, width, height, fill, fontFamily, fontSize, textAnchor, xlinkHref)
 import AnimationFrame
 
 main : Program Never Model Msg
@@ -19,7 +19,11 @@ main = program { init = init
 
 -- Model
 
-type alias Model = { rex: Rex.Model
+type GameState = Playing
+               | Paused
+
+type alias Model = { state: GameState
+                   , rex: Rex.Model
                    , cacti: List Cactus.Model
                    , ground: List GroundTile.Model
                    }
@@ -29,7 +33,7 @@ init =
   let cacti  = List.map Cactus.init [300, 800, 1100]
       tilesX = List.map ((*) GroundTile.w << toFloat) <| List.range 0 5
       ground = List.map GroundTile.init <| tilesX
-  in (Model Rex.init cacti ground, Cmd.none)
+  in (Model Paused Rex.init cacti ground, Cmd.none)
 
 
 -- Update
@@ -41,14 +45,33 @@ type Msg = Tick Time
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
+  case model.state of
+    Paused  -> (updatePaused msg model, Cmd.none)
+    Playing -> (updatePlaying msg model, Cmd.none)
+
+updatePaused : Msg -> Model -> Model
+updatePaused msg model =
   case msg of
-    KeyPressed code -> ({model | rex = Rex.update (codeToMsg code) model.rex}, Cmd.none)
-    KeyReleased     -> ({model | rex = Rex.update Rex.run model.rex}, Cmd.none)
-    Tick delta      -> ({ model | rex = Rex.update (Rex.Tick delta) model.rex
-                                , cacti = moveCacti delta model.cacti
-                                , ground = moveGround delta model.ground
-                                }, Cmd.none)
-    SubMsg          -> (model, Cmd.none)
+    KeyPressed 32 ->
+      { model | state = Playing }
+    _ ->
+      model
+
+updatePlaying : Msg -> Model -> Model
+updatePlaying msg model =
+  case msg of
+    KeyPressed 32 ->
+        { model | state = Paused }
+    KeyPressed code ->
+        { model | rex = Rex.update (codeToMsg code) model.rex }
+    KeyReleased ->
+      { model | rex = Rex.update Rex.run model.rex }
+    Tick delta ->
+      { model | rex = Rex.update (Rex.Tick delta) model.rex
+                     , cacti = moveCacti delta model.cacti
+                     , ground = moveGround delta model.ground }
+    SubMsg ->
+      model
 
 
 moveCacti : Float -> List Cactus.Model -> List Cactus.Model
@@ -89,7 +112,7 @@ subscriptions _ =
 -- View
 
 view : Model -> Html Msg
-view ({rex, cacti, ground} as model) =
+view ({state, rex, cacti, ground} as model) =
   let (w, h) = (window.width, window.height)
       windowSize = (w, h)
       svgAttributes = [ width (toString w)
@@ -103,13 +126,33 @@ view ({rex, cacti, ground} as model) =
                       , renderBackupGround windowSize
                       ] ++ (renderElements windowSize ground)
                         ++ (renderElements windowSize cacti)
-                        ++ [map (\_ -> SubMsg) (Rex.view windowSize rex)]
+                        ++ [ map (\_ -> SubMsg) (Rex.view windowSize rex)
+                           , renderMessage windowSize state
+                           ]
 
   in  Svg.svg svgAttributes sceneElements
 
-renderElements : (Float, Float) -> List Elem.Model -> List (Svg Msg)
-renderElements windowSize =
-  List.map (\o -> map (\_ -> SubMsg) (Elem.view windowSize o))
+
+renderMessage : (Float, Float) -> GameState -> Svg Msg
+renderMessage (w, h) state =
+  case state of
+    Paused ->
+      let yMiddle  = h / 2
+          attrBase = [ x << toString <| w / 2
+                     , textAnchor "middle"
+                     , fill "#E24"
+                     ]
+          attrLarge = [ y << toString <| yMiddle - 20
+                      , fontSize "50"
+                      ] ++ attrBase
+          attrSmall = [ y << toString <| yMiddle + 15
+                      , fontSize "18"
+                      ] ++ attrBase
+      in Svg.svg [] [ Svg.text_ attrLarge [ Svg.text "Paused" ]
+                    , Svg.text_ attrSmall [ Svg.text "Press SPACE to continue" ]
+                    ]
+    Playing ->
+      Svg.svg [][]
 
 renderSky: (Float, Float) -> Svg Msg
 renderSky (w, h) =
@@ -132,7 +175,11 @@ renderBackupGround (w, h) =
                ]
                []
 
+renderElements : (Float, Float) -> List Elem.Model -> List (Svg Msg)
+renderElements windowSize =
+  List.map (\o -> map (\_ -> SubMsg) (Elem.view windowSize o))
+
 window : {width: Float, height: Float}
-window = { width = 1400
+window = { width = 1000
          , height = 400
          }
