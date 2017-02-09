@@ -19,8 +19,10 @@ main = program { init = init
 
 -- Model
 
-type GameState = Playing
+type GameState = New
+               | Playing
                | Paused
+               | End
 
 type alias Model = { state: GameState
                    , rex: Rex.Model
@@ -33,7 +35,7 @@ init =
   let cacti  = List.map Cactus.init [300, 800, 1100]
       tilesX = List.map ((*) GroundTile.w << toFloat) <| List.range 0 5
       ground = List.map GroundTile.init <| tilesX
-  in (Model Paused Rex.init cacti ground, Cmd.none)
+  in (Model New Rex.init cacti ground, Cmd.none)
 
 
 -- Update
@@ -46,8 +48,8 @@ type Msg = Tick Time
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case model.state of
-    Paused  -> (updatePaused msg model, Cmd.none)
     Playing -> (updatePlaying msg model, Cmd.none)
+    _ -> (updatePaused msg model, Cmd.none)
 
 updatePaused : Msg -> Model -> Model
 updatePaused msg model =
@@ -73,6 +75,9 @@ updatePlaying msg model =
     SubMsg ->
       model
 
+
+-- TODO: OPTIMIZE THIS!
+-- TODO: Only need to check the front-most element in the list!
 
 moveCacti : Float -> List Cactus.Model -> List Cactus.Model
 moveCacti delta cacti = case cacti of
@@ -118,7 +123,6 @@ view ({state, rex, cacti, ground} as model) =
       svgAttributes = [ width (toString w)
                       , height (toString h)
                       , Attributes.viewBox <| "0 0 " ++ (toString w) ++ " " ++ (toString h)
-                      -- , VirtualDom.property "xmlns:xlink" (Json.string "http://www.w3.org/1999/xlink")
                       , Attributes.version "1.1"
                       , Attributes.style "position: fixed;"
                       ]
@@ -135,22 +139,31 @@ view ({state, rex, cacti, ground} as model) =
 
 renderMessage : (Float, Float) -> GameState -> Svg Msg
 renderMessage (w, h) state =
-  case state of
+  let yMiddle  = h / 2
+      attrBase = [ x << toString <| w / 2
+                 , textAnchor "middle"
+                 , fill "#C12"
+                 ]
+      attrLarge yPos = [ y << toString <| yMiddle + yPos
+                       , fontSize "60"
+                       ] ++ attrBase
+      attrSmall yPos = [ y << toString <| yMiddle + yPos
+                       , fontSize "18"
+                       ] ++ attrBase
+  in case state of
+    New ->
+      Svg.svg [] [ Svg.text_ (attrLarge -50) [ Svg.text "RAWЯ!" ]
+                 , Svg.text_ (attrSmall  0) [ Svg.text "Play using the arrow keys: ↑ ↓" ]
+                 , Svg.text_ (attrSmall  35) [ Svg.text "Press SPACE to pause" ]
+                 ]
     Paused ->
-      let yMiddle  = h / 2
-          attrBase = [ x << toString <| w / 2
-                     , textAnchor "middle"
-                     , fill "#E24"
-                     ]
-          attrLarge = [ y << toString <| yMiddle - 20
-                      , fontSize "50"
-                      ] ++ attrBase
-          attrSmall = [ y << toString <| yMiddle + 15
-                      , fontSize "18"
-                      ] ++ attrBase
-      in Svg.svg [] [ Svg.text_ attrLarge [ Svg.text "Paused" ]
-                    , Svg.text_ attrSmall [ Svg.text "Press SPACE to continue" ]
-                    ]
+      Svg.svg [] [ Svg.text_ (attrLarge -20) [ Svg.text "Paused!" ]
+                 , Svg.text_ (attrSmall  15) [ Svg.text "Press SPACE to continue" ]
+                 ]
+    End ->
+      Svg.svg [] [ Svg.text_ (attrLarge -20) [ Svg.text "Game Ovər!" ]
+                 , Svg.text_ (attrSmall  15) [ Svg.text "Press SPACE to try again" ]
+                 ]
     Playing ->
       Svg.svg [][]
 
