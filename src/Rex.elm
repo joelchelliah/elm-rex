@@ -3,7 +3,6 @@ module Rex exposing ( Model, Msg(..), init, update, view,
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
---import Element exposing (Element)
 import Time exposing (Time)
 
 -- Model
@@ -14,7 +13,7 @@ type alias Model = { state : State
                    , width: Int
                    , height: Int
                    , runCount : Int
-                   , runIncs : List Int
+                   , runInc : Int
                    }
 
 type State = Idle
@@ -27,8 +26,8 @@ init : Model
 init =
   let (w, h) = (92, 84)
       runCount = 1
-      runIncs = [1, 0, 0]
-  in Model Idle 0 0 w h runCount runIncs
+      runInc = 0
+  in Model Idle 0 0 w h runCount runInc
 
 
 -- Update
@@ -74,12 +73,10 @@ move delta ({yPos, yVel} as model) =
              , state = state_ }
 
 running : Model -> Model
-running model =
-  let headInc = Maybe.withDefault 0 (List.head model.runIncs)
-      restInc = List.drop 1 model.runIncs
-  in { model | state = Running
-             , runCount = model.runCount + headInc
-             , runIncs = restInc ++ [headInc]}
+running ({runCount, runInc} as model) =
+  { model | state = Running
+          , runCount = runCount + runInc
+          , runInc = 1 - runInc }
 
 
 -- View

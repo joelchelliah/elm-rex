@@ -8,7 +8,6 @@ import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
 
 type alias Model = { xPos : Float
                    , yPos: Float
-                   , xVel: Float
                    , width: Float
                    , height: Float
                    , img: String
@@ -16,7 +15,7 @@ type alias Model = { xPos : Float
 
 init : Float -> Float -> Float -> Float -> String -> Model
 init xPos yPos w h img =
-  Model xPos yPos scrollSpeed w h img
+  Model xPos yPos w h img
 
 
 -- Update
@@ -24,8 +23,8 @@ init xPos yPos w h img =
 type Msg = Tick Float
 
 update : Float -> Model -> Model
-update delta ({xPos, xVel} as model) =
-  { model | xPos = xPos + xVel * delta }
+update delta model =
+  { model | xPos = model.xPos + scrollSpeed * delta }
 
 
 -- View

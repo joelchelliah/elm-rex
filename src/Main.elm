@@ -33,7 +33,7 @@ type alias Model = { state: GameState
 init : (Model, Cmd Msg)
 init =
   let cacti  = List.map Cactus.init [300, 800, 1100]
-      tilesX = List.map ((*) GroundTile.w << toFloat) <| List.range 0 5
+      tilesX = List.map ((*) GroundTile.w << toFloat) <| List.range 0 3
       ground = List.map GroundTile.init <| tilesX
   in (Model New Rex.init cacti ground, Cmd.none)
 
@@ -70,31 +70,10 @@ updatePlaying msg model =
       { model | rex = Rex.update Rex.run model.rex }
     Tick delta ->
       { model | rex = Rex.update (Rex.Tick delta) model.rex
-                     , cacti = moveCacti delta model.cacti
-                     , ground = moveGround delta model.ground }
+              , cacti = Cactus.move window.width delta model.cacti
+              , ground = GroundTile.move window.width delta model.ground }
     SubMsg ->
       model
-
-
--- TODO: OPTIMIZE THIS!
--- TODO: Only need to check the front-most element in the list!
-
-moveCacti : Float -> List Cactus.Model -> List Cactus.Model
-moveCacti delta cacti = case cacti of
-  []   -> []
-  h::t -> let moveTail = moveCacti delta t
-          in if h.xPos < -h.width
-             then Cactus.init window.width :: moveTail
-             else Cactus.update delta h :: moveTail
-
-moveGround : Float -> List GroundTile.Model -> List GroundTile.Model
-moveGround delta ground = case ground of
-    []   -> []
-    h::t -> let errorMargin = 10
-                moveTail = moveGround delta t
-            in if h.xPos < -h.width
-               then GroundTile.init (window.width - errorMargin) :: moveTail
-               else GroundTile.update delta h :: moveTail
 
 codeToMsg : KeyCode -> Rex.Msg
 codeToMsg code =
