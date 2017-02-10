@@ -1,7 +1,7 @@
 module MovingElement exposing (Model, Msg, update, view)
 
-import Svg exposing (Svg, Attribute)
-import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
+import Svg exposing (Svg)
+import Svg.Attributes exposing (..)
 
 
 -- Model
@@ -13,10 +13,6 @@ type alias Model a =
       , height: Float
       , img: String
   }
-
--- init : Float -> Float -> Float -> Float -> String -> Model a
--- init xPos yPos w h img =
---   Model xPos yPos w h img
 
 
 -- Update
@@ -33,10 +29,10 @@ update delta model =
 view : (Float, Float) -> Model a -> Svg Msg
 view (_, windowH) model =
   let (offsetX, offsetY) = (0, windowH - 100)
-      x_ = offsetX + model.xPos |> toString
-      y_ = offsetY - model.yPos |> toString
-  in  Svg.image [ x x_
-                , y y_
+      xPos = offsetX + model.xPos |> toString
+      yPos = offsetY - model.yPos |> toString
+  in  Svg.image [ x xPos
+                , y yPos
                 , width <| toString model.width
                 , height <| toString model.height
                 , xlinkHref model.img

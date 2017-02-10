@@ -38,6 +38,7 @@ update : Msg -> Model -> Model
 update msg model =
   let isJumping = model.state == Jumping
       isRunning = model.state == Running
+      jumpForce = -1.3
   in case msg of
     Run  -> if isJumping
             then model
@@ -45,8 +46,8 @@ update msg model =
     Jump -> if isJumping
             then model
             else { model | state = Jumping
-                         , yPos  = -1.2
-                         , yVel  = -1.2 }
+                         , yPos  = jumpForce
+                         , yVel  = jumpForce }
     Duck -> if isJumping
             then model
             else { model | state = Ducking }

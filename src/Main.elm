@@ -141,7 +141,7 @@ renderMessage (w, h) state =
                  , Svg.text_ (attrSmall  35) [ Svg.text "Press SPACE to pause" ]
                  ]
     Paused ->
-      Svg.svg [] [ Svg.text_ (attrLarge -20) [ Svg.text "Pauƨed!" ]
+      Svg.svg [] [ Svg.text_ (attrLarge -20) [ Svg.text "Paused!" ]
                  , Svg.text_ (attrSmall  15) [ Svg.text "Press SPACE to continue" ]
                  ]
     End ->
