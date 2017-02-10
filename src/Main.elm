@@ -3,19 +3,20 @@ import Cactus
 import GroundTile
 import MovingElement as Elem
 
-import Html exposing (Html, div, program, map)
+import Html exposing (Html, programWithFlags, div, map)
 import Time exposing (Time)
 import Keyboard exposing (KeyCode)
-import Svg exposing (Svg, Attribute)
-import Svg.Attributes as Attributes exposing (x, y, width, height, fill, fontFamily, fontSize, textAnchor, xlinkHref)
+import Svg exposing (Svg)
+import Svg.Attributes exposing (..)
 import AnimationFrame
+import Random exposing (initialSeed)
 
-main : Program Never Model Msg
-main = program { init = init
-               , view = view
-               , update = update
-               , subscriptions = subscriptions
-               }
+main : Program Flags Model Msg
+main = programWithFlags { init = init
+                        , view = view
+                        , update = update
+                        , subscriptions = subscriptions
+                        }
 
 -- Model
 
@@ -30,9 +31,13 @@ type alias Model = { state: GameState
                    , ground: List GroundTile.Model
                    }
 
-init : (Model, Cmd Msg)
-init =
-  let cacti  = List.map Cactus.init [300, 800, 1100]
+type alias Flags = { randomSeed : Int }
+
+init : Flags -> (Model, Cmd Msg)
+init {randomSeed} =
+  --let cacti  = List.map Cactus.init [300, 800, 1100]
+  let seed0  = initialSeed randomSeed
+      cacti  = [Cactus.init 400 seed0]
       tilesX = List.map ((*) GroundTile.w << toFloat) <| List.range 0 3
       ground = List.map GroundTile.init <| tilesX
   in (Model New Rex.init cacti ground, Cmd.none)
@@ -99,21 +104,21 @@ view : Model -> Html Msg
 view ({state, rex, cacti, ground} as model) =
   let (w, h) = (window.width, window.height)
       windowSize = (w, h)
-      svgAttributes = [ width (toString w)
-                      , height (toString h)
-                      , Attributes.viewBox <| "0 0 " ++ (toString w) ++ " " ++ (toString h)
-                      , Attributes.version "1.1"
-                      , Attributes.style "position: fixed;"
-                      ]
+      attributes = [ width (toString w)
+                   , height (toString h)
+                   , viewBox <| "0 0 " ++ (toString w) ++ " " ++ (toString h)
+                   , version "1.1"
+                   , style "position: fixed;"
+                   ]
       sceneElements = [ renderSky windowSize
                       , renderBackupGround windowSize
-                      ] ++ (renderElements windowSize ground)
-                        ++ (renderElements windowSize cacti)
+                      ] ++ (renderMovingElements windowSize ground)
+                        ++ (renderMovingElements windowSize cacti)
                         ++ [ map (\_ -> SubMsg) (Rex.view windowSize rex)
                            , renderMessage windowSize state
                            ]
 
-  in  Svg.svg svgAttributes sceneElements
+  in  Svg.svg attributes sceneElements
 
 
 renderMessage : (Float, Float) -> GameState -> Svg Msg
@@ -136,7 +141,7 @@ renderMessage (w, h) state =
                  , Svg.text_ (attrSmall  35) [ Svg.text "Press SPACE to pause" ]
                  ]
     Paused ->
-      Svg.svg [] [ Svg.text_ (attrLarge -20) [ Svg.text "Paused!" ]
+      Svg.svg [] [ Svg.text_ (attrLarge -20) [ Svg.text "Pauƨed!" ]
                  , Svg.text_ (attrSmall  15) [ Svg.text "Press SPACE to continue" ]
                  ]
     End ->
@@ -167,8 +172,8 @@ renderBackupGround (w, h) =
                ]
                []
 
-renderElements : (Float, Float) -> List Elem.Model -> List (Svg Msg)
-renderElements windowSize =
+renderMovingElements : (Float, Float) -> List (Elem.Model a) -> List (Svg Msg)
+renderMovingElements windowSize =
   List.map (\o -> map (\_ -> SubMsg) (Elem.view windowSize o))
 
 window : {width: Float, height: Float}

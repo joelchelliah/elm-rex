@@ -10,8 +10,8 @@ import Time exposing (Time)
 type alias Model = { state : State
                    , yPos: Float
                    , yVel: Float
-                   , width: Int
-                   , height: Int
+                   , width: Float
+                   , height: Float
                    , runCount : Int
                    , runInc : Int
                    }
@@ -23,11 +23,7 @@ type State = Idle
            | Dead
 
 init : Model
-init =
-  let (w, h) = (92, 84)
-      runCount = 1
-      runInc = 0
-  in Model Idle 0 0 w h runCount runInc
+init = Model Idle 0 0 w h 1 0
 
 
 -- Update
@@ -85,7 +81,7 @@ view : (Float, Float) -> Model -> Svg Msg
 view (_, windowH) rex =
   let (offsetX, offsetY) = (50, windowH - 60)
       x_ = offsetX |> toString
-      y_ = offsetY - (toFloat rex.height) + rex.yPos |> toString
+      y_ = offsetY - rex.height + rex.yPos |> toString
   in  Svg.image [ x x_
                 , y y_
                 , width <| toString rex.width
@@ -107,6 +103,7 @@ render {state, yVel, runCount} =
 
 
 -- Actions
+
 run : Msg
 run = Run
 
@@ -115,3 +112,13 @@ duck = Duck
 
 jump : Msg
 jump = Jump
+
+
+w : Float
+w = size.width
+
+h : Float
+h = size.height
+
+size : {width: Float, height: Float}
+size = { width = 92, height = 84 }
