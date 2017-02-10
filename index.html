@@ -9,6 +9,7 @@
 <body>
 </body>
 <script type="text/javascript">
-  var app = Elm.Main.fullscreen();
+  var seed = { randomSeed: Math.floor(Math.random()*0xFFFFFFFF) }
+  var app  = Elm.Main.fullscreen(seed);
 </script>
 </html>

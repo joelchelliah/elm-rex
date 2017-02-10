@@ -6,3 +6,5 @@ build
 deploy
 
 *.json
+
+.DS_Store
