@@ -1,4 +1,4 @@
-module GroundTile exposing (Model, init, update, view, move, w, h)
+module Dirt exposing (Model, init, update, view, move, w, h)
 
 import MovingElement as Elem
 import Svg exposing (Svg)

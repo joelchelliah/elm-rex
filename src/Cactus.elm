@@ -22,10 +22,6 @@ update = Elem.update
 view : (Float, Float) -> Model -> Svg Msg
 view = Elem.view
 
--- move : Float -> Float -> List Model -> List Model
--- move x delta cacti =
---   let prune = replaceOrUpdate x delta
---   in List.map prune cacti
 
 w : Float
 w = size.width
@@ -33,12 +29,5 @@ w = size.width
 h : Float
 h = size.height
 
-
 size : {width: Float, height: Float}
 size = { width = 64, height = 84 }
-
--- replaceOrUpdate : Float -> Float -> Model -> Model
--- replaceOrUpdate x delta cactus =
---   if cactus.xPos < -cactus.width
---   then init x cactus.seed
---   else update delta cactus

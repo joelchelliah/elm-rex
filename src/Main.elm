@@ -1,6 +1,6 @@
 import Rex
 import CactusGenerator as CactusGen
-import GroundTile
+import DirtGenerator as DirtGen
 import MovingElement as Elem
 
 import Html exposing (Html, programWithFlags, div, map)
@@ -28,7 +28,7 @@ type GameState = New
 type alias Model = { state: GameState
                    , rex: Rex.Model
                    , cactusGen: CactusGen.Model
-                   , ground: List GroundTile.Model
+                   , dirtGen: DirtGen.Model
                    }
 
 type alias Flags = { randomSeed : Int }
@@ -37,9 +37,8 @@ init : Flags -> (Model, Cmd Msg)
 init {randomSeed} =
   let firstSeed = initialSeed randomSeed
       cactusGen = CactusGen.init window.width firstSeed
-      tilesX    = List.map ((*) GroundTile.w << toFloat) <| List.range 0 3
-      ground    = List.map GroundTile.init <| tilesX
-  in (Model New Rex.init cactusGen ground, Cmd.none)
+      dirtGen   = DirtGen.init window.width
+  in (Model New Rex.init cactusGen dirtGen, Cmd.none)
 
 
 -- Update
@@ -75,7 +74,7 @@ updatePlaying msg model =
     Tick delta ->
       { model | rex = Rex.update (Rex.Tick delta) model.rex
               , cactusGen = CactusGen.update delta model.cactusGen
-              , ground = GroundTile.move window.width delta model.ground }
+              , dirtGen = DirtGen.update delta model.dirtGen }
     SubMsg ->
       model
 
@@ -100,7 +99,7 @@ subscriptions _ =
 -- View
 
 view : Model -> Html Msg
-view ({state, rex, cactusGen, ground} as model) =
+view ({state, rex, cactusGen, dirtGen} as model) =
   let (w, h) = (window.width, window.height)
       windowSize = (w, h)
       attributes = [ width (toString w)
@@ -111,7 +110,7 @@ view ({state, rex, cactusGen, ground} as model) =
                    ]
       sceneElements = [ renderSky windowSize
                       , renderBackupGround windowSize
-                      ] ++ (renderMovingElements windowSize ground)
+                      ] ++ (renderMovingElements windowSize dirtGen.dirtTiles)
                         ++ (renderMovingElements windowSize cactusGen.cacti)
                         ++ [ map (\_ -> SubMsg) (Rex.view windowSize rex)
                            , renderMessage windowSize state
