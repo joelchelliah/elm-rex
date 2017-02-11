@@ -2,6 +2,7 @@ module CactusGenerator exposing (Model, init, update)
 
 import Cactus
 import Random exposing (Seed, initialSeed, step)
+import List exposing (length, map2)
 
 
 type alias Model =
@@ -12,13 +13,12 @@ type alias Model =
 
 init : Float -> Seed -> Model
 init xPos seed0 =
-  let numberOfCacti    = 3
-      (indices, seed1) = generateIndices numberOfCacti seed0
-      generateCactus i = Cactus.init ((xPos + (toFloat i) * xPos) / 2) i
+  let cactiPositions = [xPos, xPos + 400, xPos + 700]
+      (cacti, seed1) = generateCacti cactiPositions seed0
   in { spawnX = xPos
      , seed   = seed1
-     , cacti  = List.map generateCactus indices
-    }
+     , cacti  = cacti
+     }
 
 update : Float -> Model -> Model
 update delta model =
@@ -33,6 +33,14 @@ replaceOrUpdate delta xPos index cactus =
   if cactus.xPos < -cactus.width
   then Cactus.init xPos index
   else Cactus.update delta cactus
+
+generateCacti : List Float -> Seed -> (List Cactus.Model, Seed)
+generateCacti positions seed0 =
+  let numCacti     = length positions
+      (is, seed1)  = generateIndices numCacti seed0
+      gen (pos, i) = Cactus.init pos i
+      randomCacti  = List.map gen <| map2 (,) positions is
+  in (randomCacti, seed1)
 
 generateIndices : Int -> Seed -> (List Int, Seed)
 generateIndices num seed =
