@@ -1,5 +1,4 @@
-module Rex exposing ( Model, Msg(..), init, update, view,
-                      run, duck, jump)
+module Rex exposing ( Model, Msg(..), init, update, view)
 
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
@@ -116,18 +115,6 @@ render {state, yVel, runCount} =
     Jumping -> toImg <| "jump_" ++ jumpingIndex
     Ducking -> toImg <| "duck_" ++ runningIndex
     Dead    -> toImg <| "idle"
-
-
--- Actions
-
-run : Msg
-run = Run
-
-duck : Msg
-duck = Duck
-
-jump : Msg
-jump = Jump
 
 
 sizeRunning : {width: Float, height: Float}

@@ -70,7 +70,7 @@ updatePlaying msg model =
     KeyPressed code ->
         { model | rex = Rex.update (codeToMsg code) model.rex }
     KeyReleased ->
-      { model | rex = Rex.update Rex.run model.rex }
+      { model | rex = Rex.update Rex.Run model.rex }
     Tick delta ->
       { model | rex = Rex.update (Rex.Tick delta) model.rex
               , cactusGen = CactusGen.update delta model.cactusGen
