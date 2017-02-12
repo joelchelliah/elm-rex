@@ -13,7 +13,7 @@ type alias Model = { state : State
                    , width: Float
                    , height: Float
                    , runCount : Int
-                   , runInc : Int
+                   , frameInc : Int
                    }
 
 type State = Idle
@@ -23,7 +23,14 @@ type State = Idle
            | Dead
 
 init : Model
-init = Model Idle 0 0 w h 1 0
+init = { state = Idle
+       , yPos = 0
+       , yVel = 0
+       , width = sizeRunning.width
+       , height = sizeRunning.width
+       , runCount = 1
+       , frameInc = 0
+       }
 
 
 -- Update
@@ -36,31 +43,33 @@ type Msg = Run
 
 update : Msg -> Model -> Model
 update msg model =
-  let isJumping = model.state == Jumping
-      isRunning = model.state == Running
-      jumpForce = -1.3
-  in case msg of
-    Run  -> if isJumping
-            then model
-            else running model
-    Jump -> if isJumping
-            then model
-            else { model | state = Jumping
-                         , yPos  = jumpForce
-                         , yVel  = jumpForce }
-    Duck -> if isJumping
-            then model
-            else { model | state = Ducking }
-    Kill -> model
+  case msg of
+    Run  -> case model.state of
+      Jumping -> model
+      _       -> animate Running model
+    Jump -> case model.state of
+      Jumping -> model
+      _       -> initJump <| animate Running model
+    Duck -> case model.state of
+      Jumping -> model
+      _       -> animate Ducking model
+    Kill -> { model | state = Dead }
 
-    Tick delta -> if isJumping
-                  then move delta model
-                  else if isRunning
-                       then running model
-                       else model
+    Tick delta -> case model.state of
+      Jumping -> updateJump delta model
+      Running -> animate Running model
+      Ducking -> animate Ducking model
+      _       -> model
 
-move : Time -> Model -> Model
-move delta ({yPos, yVel} as model) =
+initJump : Model -> Model
+initJump model =
+  let jumpForce = -1.3
+  in { model | state = Jumping
+             , yPos  = jumpForce
+             , yVel  = jumpForce }
+
+updateJump : Time -> Model -> Model
+updateJump delta ({yPos, yVel} as model) =
   let gravity = 0.005
       (state_, yPos_, yVel_) = if yPos >= 0
                                then (Running, 0, 0)
@@ -69,11 +78,16 @@ move delta ({yPos, yVel} as model) =
              , yVel = yVel_
              , state = state_ }
 
-running : Model -> Model
-running ({runCount, runInc} as model) =
-  { model | state = Running
-          , runCount = runCount + runInc
-          , runInc = 1 - runInc }
+animate : State -> Model -> Model
+animate state ({runCount, frameInc} as model) =
+  let size = case state of
+    Ducking -> sizeDucking
+    _       -> sizeRunning
+  in { model | state = state
+             , width = size.width
+             , height = size.height
+             , runCount = runCount + frameInc
+             , frameInc = 1 - frameInc }
 
 
 -- View
@@ -93,14 +107,15 @@ view (_, windowH) rex =
 
 render: Model -> String
 render {state, yVel, runCount} =
-  let runI = toString <| runCount % 6
-      jumpI = toString <| if yVel < 0 then 0 else 1
+  let runningIndex = toString <| runCount % 6
+      jumpingIndex = toString <| if yVel < 0 then 0 else 1
+      toImg action = "images/" ++ action ++ ".png"
   in case state of
-    Idle    -> "images/idle.png"
-    Running -> "images/run_" ++ runI ++ ".png"
-    Jumping -> "images/jump_" ++ jumpI ++ ".png"
-    Ducking -> "images/run_3.png"
-    Dead    -> "images/idle.png"
+    Idle    -> toImg <| "idle"
+    Running -> toImg <| "run_" ++ runningIndex
+    Jumping -> toImg <| "jump_" ++ jumpingIndex
+    Ducking -> toImg <| "duck_" ++ runningIndex
+    Dead    -> toImg <| "idle"
 
 
 -- Actions
@@ -115,11 +130,8 @@ jump : Msg
 jump = Jump
 
 
-w : Float
-w = size.width
+sizeRunning : {width: Float, height: Float}
+sizeRunning = { width = 92, height = 84 }
 
-h : Float
-h = size.height
-
-size : {width: Float, height: Float}
-size = { width = 92, height = 84 }
+sizeDucking : {width: Float, height: Float}
+sizeDucking = { width = 108, height = 60 }
