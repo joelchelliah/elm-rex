@@ -102,19 +102,19 @@ view : Model -> Html Msg
 view ({state, rex, cactusGen, dirtGen} as model) =
   let (w, h) = (window.width, window.height)
       windowSize = (w, h)
-      attributes = [ width (toString w)
-                   , height (toString h)
+      attributes = [ width   <| toString w
+                   , height  <| toString h
                    , viewBox <| "0 0 " ++ (toString w) ++ " " ++ (toString h)
                    , version "1.1"
-                   , style "position: fixed;"
+                   , style   "position: fixed;"
                    ]
       sceneElements = [ renderSky windowSize
                       , renderBackupGround windowSize
-                      ] ++ (renderMovingElements windowSize dirtGen.dirtTiles)
-                        ++ (renderMovingElements windowSize cactusGen.cacti)
-                        ++ [ map (\_ -> SubMsg) (Rex.view windowSize rex)
-                           , renderMessage windowSize state
-                           ]
+                      , renderMovingElements windowSize dirtGen.dirtTiles
+                      , renderMovingElements windowSize cactusGen.cacti
+                      , renderRex windowSize rex
+                      , renderMessage windowSize state
+                      ]
 
   in  Svg.svg attributes sceneElements
 
@@ -170,9 +170,14 @@ renderBackupGround (w, h) =
                ]
                []
 
-renderMovingElements : (Float, Float) -> List (Elem.Model a) -> List (Svg Msg)
-renderMovingElements windowSize =
-  List.map (\o -> map (\_ -> SubMsg) (Elem.view windowSize o))
+renderMovingElements : (Float, Float) -> List (Elem.Model a) -> Svg Msg
+renderMovingElements windowSize elems =
+  let render elem = map (\_ -> SubMsg) (Elem.view windowSize elem)
+  in Svg.svg [] <| List.map render elems
+
+renderRex : (Float, Float) -> Rex.Model -> Svg Msg
+renderRex windowSize rex =
+  map (\_ -> SubMsg) (Rex.view windowSize rex)
 
 window : {width: Float, height: Float}
 window = { width = 1000
