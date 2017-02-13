@@ -35,10 +35,13 @@ type alias Flags = { randomSeed : Int }
 
 init : Flags -> (Model, Cmd Msg)
 init {randomSeed} =
-  let firstSeed = initialSeed randomSeed
-      cactusGen = CactusGen.init window.width firstSeed
-      dirtGen   = DirtGen.init window.width
-  in (Model New Rex.init cactusGen dirtGen, Cmd.none)
+  let seed0 = initialSeed randomSeed
+      model = { state     = New
+              , rex       = Rex.init
+              , cactusGen = CactusGen.init window.width seed0
+              , dirtGen   = DirtGen.init window.width
+              }
+  in (model, Cmd.none)
 
 
 -- Update
@@ -52,15 +55,13 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case model.state of
     Playing -> (updatePlaying msg model, Cmd.none)
-    _ -> (updatePaused msg model, Cmd.none)
+    _       -> (updatePaused msg model, Cmd.none)
 
 updatePaused : Msg -> Model -> Model
 updatePaused msg model =
   case msg of
-    KeyPressed 32 ->
-      { model | state = Playing }
-    _ ->
-      model
+    KeyPressed 32 -> { model | state = Playing }
+    _ ->             model
 
 updatePlaying : Msg -> Model -> Model
 updatePlaying msg model =

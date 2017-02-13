@@ -114,7 +114,7 @@ render {state, yVel, runCount} =
     Running -> toImg <| "run_" ++ runningIndex
     Jumping -> toImg <| "jump_" ++ jumpingIndex
     Ducking -> toImg <| "duck_" ++ runningIndex
-    Dead    -> toImg <| "idle"
+    Dead    -> toImg <| "dead"
 
 
 sizeRunning : {width: Float, height: Float}
