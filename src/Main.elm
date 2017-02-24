@@ -111,7 +111,7 @@ view ({state, rex, cactusGen, dirtGen} as model) =
                    ]
       sceneElements = [ renderSky windowSize
                       , renderBackupGround windowSize
-                      , renderMovingElements windowSize dirtGen.dirtTiles
+                      --, renderMovingElements windowSize dirtGen.dirtTiles
                       , renderMovingElements windowSize cactusGen.cacti
                       , renderRex windowSize rex
                       , renderMessage windowSize state
@@ -162,14 +162,35 @@ renderSky (w, h) =
 -- For when the ground sprites don't get rendered in time...
 renderBackupGround: (Float,Float) -> Svg Msg
 renderBackupGround (w, h) =
-  let y_ = window.height - 86 |> toString
-  in  Svg.rect [ fill "#C18C57"
-               , x "0"
-               , y y_
-               , width (toString w)
-               , height (toString h)
-               ]
-               []
+  let filledRect col yPos = Svg.rect [ fill col
+                                     , x "0"
+                                     , y <| toString <| window.height - yPos
+                                     , width <| toString w
+                                     , height <| toString yPos
+                                     ]
+                                     []
+      groundCol = Svg.linearGradient [ id "gradGround"
+                                     , x1 "0%" , x2 "0%"
+                                     , y1 "0%" , y2 "100%"
+                                     ]
+                                     [ Svg.stop [ offset "0%"
+                                                , stopColor "#DA8D40"
+                                                , stopOpacity "1"
+                                                ]
+                                                []
+                                     , Svg.stop [ offset "100%"
+                                                , stopColor "#1F1000"
+                                                , stopOpacity "1"
+                                                ]
+                                                []
+                                     ]
+      outline = filledRect "#EEC39A" 86
+      ground  = filledRect "url(#gradGround)" 84
+  in Svg.svg []
+             [ Svg.defs [] [ groundCol ]
+             , outline
+             , ground
+             ]
 
 renderMovingElements : (Float, Float) -> List (Elem.Model a) -> Svg Msg
 renderMovingElements windowSize elems =
