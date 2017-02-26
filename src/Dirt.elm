@@ -19,7 +19,7 @@ init x =
 update : Float -> Model -> Model
 update = Elem.update
 
-view : (Float, Float) -> Model -> Svg Msg
+view : Model -> Svg Msg
 view = Elem.view
 
 move : Float -> Float -> List Model -> List Model

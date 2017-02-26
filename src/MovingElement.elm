@@ -1,5 +1,7 @@
 module MovingElement exposing (Model, Msg, update, view)
 
+import WindowSize exposing (..)
+
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 
@@ -26,9 +28,9 @@ update delta model =
 
 -- View
 
-view : (Float, Float) -> Model a -> Svg Msg
-view (_, windowH) model =
-  let (offsetX, offsetY) = (0, windowH - 100)
+view : Model a -> Svg Msg
+view model =
+  let (offsetX, offsetY) = (0, windowHeight - 100)
       xPos = offsetX + model.xPos |> toString
       yPos = offsetY - model.yPos |> toString
   in  Svg.image [ x xPos

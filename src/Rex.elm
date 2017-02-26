@@ -1,5 +1,7 @@
 module Rex exposing ( Model, Msg(..), init, update, view)
 
+import WindowSize exposing (..)
+
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
 import Time exposing (Time)
@@ -91,9 +93,9 @@ animate state ({runCount, frameInc} as model) =
 
 -- View
 
-view : (Float, Float) -> Model -> Svg Msg
-view (_, windowH) rex =
-  let (offsetX, offsetY) = (50, windowH - 60)
+view : Model -> Svg Msg
+view rex =
+  let (offsetX, offsetY) = (50, windowHeight - 60)
       x_ = offsetX |> toString
       y_ = offsetY - rex.height + rex.yPos |> toString
   in  Svg.image [ x x_

@@ -2,6 +2,8 @@ import Rex
 import CactusGenerator as CactusGen
 import DirtGenerator as DirtGen
 import MovingElement as Elem
+import Background
+import WindowSize exposing (..)
 
 import Html exposing (Html, programWithFlags, div, map)
 import Time exposing (Time)
@@ -38,8 +40,8 @@ init {randomSeed} =
   let seed0 = initialSeed randomSeed
       model = { state     = New
               , rex       = Rex.init
-              , cactusGen = CactusGen.init window.width seed0
-              , dirtGen   = DirtGen.init window.width
+              , cactusGen = CactusGen.init windowWidth seed0
+              , dirtGen   = DirtGen.init windowWidth
               }
   in (model, Cmd.none)
 
@@ -101,29 +103,26 @@ subscriptions _ =
 
 view : Model -> Html Msg
 view ({state, rex, cactusGen, dirtGen} as model) =
-  let (w, h) = (window.width, window.height)
-      windowSize = (w, h)
-      attributes = [ width   <| toString w
-                   , height  <| toString h
-                   , viewBox <| "0 0 " ++ (toString w) ++ " " ++ (toString h)
+  let (w, h) = (toString windowWidth, toString windowHeight)
+      attributes = [ width w
+                   , height h
+                   , viewBox <| "0 0 " ++ w ++ " " ++ h
                    , version "1.1"
                    , style   "position: fixed;"
                    ]
-      sceneElements = [ renderSky windowSize
-                      , renderBackupGround windowSize
-                      --, renderMovingElements windowSize dirtGen.dirtTiles
-                      , renderMovingElements windowSize cactusGen.cacti
-                      , renderRex windowSize rex
-                      , renderMessage windowSize state
+      sceneElements = [ renderBackground
+                      , renderMovingElements cactusGen.cacti
+                      , renderRex rex
+                      , renderMessages state
                       ]
 
   in  Svg.svg attributes sceneElements
 
 
-renderMessage : (Float, Float) -> GameState -> Svg Msg
-renderMessage (w, h) state =
-  let yMiddle  = h / 2
-      attrBase = [ x << toString <| w / 2
+renderMessages : GameState -> Svg Msg
+renderMessages state =
+  let yMiddle  = windowHeight / 2
+      attrBase = [ x << toString <| windowWidth / 2
                  , textAnchor "middle"
                  , fill "#C12"
                  ]
@@ -150,43 +149,16 @@ renderMessage (w, h) state =
     Playing ->
       Svg.svg [][]
 
-renderSky: (Float, Float) -> Svg Msg
-renderSky (w, h) =
-  Svg.rect [ fill "#99E"
-           , x "0"
-           , y "0"
-           , width (toString w)
-           , height (toString h) ]
-           []
 
--- For when the ground sprites don't get rendered in time...
-renderBackupGround: (Float,Float) -> Svg Msg
-renderBackupGround (w, h) =
-  let fillRect col yPos = Svg.rect [ fill col
-                                   , x "0"
-                                   , y <| toString <| window.height - yPos
-                                   , width <| toString w
-                                   , height <| toString yPos
-                                   ]
-                                   []
-      gColors  = ["#EEC39A", "#D9A066", "#CE975F", "#C18C57",
-                  "#B58452", "#A87A4C", "#9A7046"]
-      gHeights = [90, 88, 72, 56, 40, 24, 8]
-      filledRows = List.map fillRect gColors
-      placedRows = List.map2 identity filledRows gHeights
+renderBackground : Svg Msg
+renderBackground =
+  map (\_ -> SubMsg) Background.view
 
-  in Svg.svg [] placedRows
-
-renderMovingElements : (Float, Float) -> List (Elem.Model a) -> Svg Msg
-renderMovingElements windowSize elems =
-  let render elem = map (\_ -> SubMsg) (Elem.view windowSize elem)
+renderMovingElements : List (Elem.Model a) -> Svg Msg
+renderMovingElements elems =
+  let render elem = map (\_ -> SubMsg) (Elem.view elem)
   in Svg.svg [] <| List.map render elems
 
-renderRex : (Float, Float) -> Rex.Model -> Svg Msg
-renderRex windowSize rex =
-  map (\_ -> SubMsg) (Rex.view windowSize rex)
-
-window : {width: Float, height: Float}
-window = { width = 1000
-         , height = 400
-         }
+renderRex : Rex.Model -> Svg Msg
+renderRex rex =
+  map (\_ -> SubMsg) (Rex.view rex)
