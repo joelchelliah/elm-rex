@@ -162,35 +162,20 @@ renderSky (w, h) =
 -- For when the ground sprites don't get rendered in time...
 renderBackupGround: (Float,Float) -> Svg Msg
 renderBackupGround (w, h) =
-  let filledRect col yPos = Svg.rect [ fill col
-                                     , x "0"
-                                     , y <| toString <| window.height - yPos
-                                     , width <| toString w
-                                     , height <| toString yPos
-                                     ]
-                                     []
-      groundCol = Svg.linearGradient [ id "gradGround"
-                                     , x1 "0%" , x2 "0%"
-                                     , y1 "0%" , y2 "100%"
-                                     ]
-                                     [ Svg.stop [ offset "0%"
-                                                , stopColor "#DA8D40"
-                                                , stopOpacity "1"
-                                                ]
-                                                []
-                                     , Svg.stop [ offset "100%"
-                                                , stopColor "#1F1000"
-                                                , stopOpacity "1"
-                                                ]
-                                                []
-                                     ]
-      outline = filledRect "#EEC39A" 86
-      ground  = filledRect "url(#gradGround)" 84
-  in Svg.svg []
-             [ Svg.defs [] [ groundCol ]
-             , outline
-             , ground
-             ]
+  let fillRect col yPos = Svg.rect [ fill col
+                                   , x "0"
+                                   , y <| toString <| window.height - yPos
+                                   , width <| toString w
+                                   , height <| toString yPos
+                                   ]
+                                   []
+      gColors  = ["#EEC39A", "#D9A066", "#CE975F", "#C18C57",
+                  "#B58452", "#A87A4C", "#9A7046"]
+      gHeights = [90, 88, 72, 56, 40, 24, 8]
+      filledRows = List.map fillRect gColors
+      placedRows = List.map2 identity filledRows gHeights
+
+  in Svg.svg [] placedRows
 
 renderMovingElements : (Float, Float) -> List (Elem.Model a) -> Svg Msg
 renderMovingElements windowSize elems =
