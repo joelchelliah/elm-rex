@@ -6,13 +6,16 @@ import CactusGenerator as CactusGen
 import MovingElement as Elem
 import Background
 import WindowSize exposing (..)
-import Html exposing (Html, programWithFlags, div, map)
+import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text)
+import Html.Attributes exposing (href)
 import Time exposing (Time)
 import Keyboard exposing (KeyCode)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import AnimationFrame
 import Random exposing (initialSeed)
+import FontAwesome as Icon
+import Color
 
 
 main : Program Flags Model Msg
@@ -183,7 +186,6 @@ view ({ state, hud, rex, cactusGen } as model) =
             , height h
             , viewBox <| "0 0 " ++ w ++ " " ++ h
             , version "1.1"
-            , style "position: fixed;"
             ]
 
         sceneElements =
@@ -194,7 +196,20 @@ view ({ state, hud, rex, cactusGen } as model) =
             , renderHud hud
             ]
     in
-        Svg.svg attributes sceneElements
+        div []
+            [ renderHeader
+            , Svg.svg attributes sceneElements
+            , renderInfo
+            ]
+
+
+renderHeader : Html Msg
+renderHeader =
+    div []
+        [ h1 []
+            [ text "ELM-REX" ]
+        , h5 [] [ text "An Elm port of Chrome's T-rex runner game" ]
+        ]
 
 
 renderMessages : GameState -> Int -> Svg Msg
@@ -226,7 +241,7 @@ renderMessages state score =
                 Svg.svg []
                     [ Svg.text_ (attrLarge -50) [ Svg.text "RAWЯ!" ]
                     , Svg.text_ (attrSmall 0) [ Svg.text "Play using the arrow keys: ↑ ↓" ]
-                    , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to pause" ]
+                    , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to start / pause" ]
                     ]
 
             Paused ->
@@ -268,3 +283,16 @@ renderRex rex =
 renderHud : Hud.Model -> Svg Msg
 renderHud hud =
     map (\_ -> SubMsg) (Hud.view hud)
+
+
+renderInfo : Html Msg
+renderInfo =
+    let
+        url =
+            "https://github.com/joelchelliah/elm-rex"
+    in
+        div
+            [ class "info" ]
+            [ Icon.github (Color.black) 20
+            , a [ href url ] [ text "Check it out on github" ]
+            ]

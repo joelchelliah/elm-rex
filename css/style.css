@@ -1,11 +1,24 @@
-#main {
-  background-color: #A9E;
-  height: 400px;
-  position: relative;
+body {
+  text-align: center;
 }
 
-#rex {
-  position: absolute;
-  bottom: 5%;
-  left: 5%;
+h1 {
+  border-bottom: 1px solid lightgray;
+}
+
+h5 {
+  color: gray;
+  font-size: 0.9em;
+  font-weight: normal;
+  margin: 12px 0;
+}
+
+.info {
+  padding-top: 10px;
+}
+
+.info a {
+  padding: 2px 0px 0px 5px;
+  display: inline-block;
+  vertical-align: top;
 }
