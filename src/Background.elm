@@ -17,72 +17,80 @@ view =
 
 renderSky : Svg {}
 renderSky =
-    Svg.rect
-        [ fill "#99E"
-        , x "0"
-        , y "0"
-        , width <| toString windowWidth
-        , height <| toString windowHeight
-        ]
-        []
+    let
+        fillSkyRow =
+            fillRow "0.08" "#4575FF"
+
+        rows =
+            map fillSkyRow skyRowPositions
+    in
+        Svg.svg [] rows
 
 
 renderGround : Svg {}
 renderGround =
     let
-        filledRows =
-            map fillRect groundRowColors
+        fillGroundRow =
+            fillRow "1.0"
 
-        placedRows =
-            map2 identity filledRows groundRowPositions
+        outline =
+            fillGroundRow "#EEC39A" 90
+
+        makeRow =
+            map fillGroundRow groundRowColors
+
+        rows =
+            map2 identity makeRow groundRowPositions
     in
-        Svg.svg [] placedRows
+        Svg.svg [] <| outline :: rows
 
 
-fillRect : String -> Float -> Svg {}
-fillRect col yPos =
+fillRow : String -> String -> Float -> Svg {}
+fillRow alpha col yPos =
     Svg.rect
         [ fill col
         , x "0"
         , y <| toString <| windowHeight - yPos
         , width <| toString windowWidth
         , height <| toString yPos
+        , opacity alpha
         ]
         []
 
 
 groundRowColors : List String
 groundRowColors =
+    [ "#D9A066"
+    , "#CE975F"
+    , "#C18C57"
+    , "#B58452"
+    , "#A87A4C"
+    , "#9A7046"
+    , "#8C6545"
+    , "#825E41"
+    , "#78563C"
+    ]
+
+
+skyRowPositions : List Float
+skyRowPositions =
     let
-        topBorder =
-            "#EEC39A"
+        nextLine h =
+            if h < 90 then
+                Nothing
+            else
+                Just <| h - 15
     in
-        topBorder
-            :: [ "#D9A066"
-               , "#CE975F"
-               , "#C18C57"
-               , "#B58452"
-               , "#A87A4C"
-               , "#9A7046"
-               , "#8C6545"
-               , "#825E41"
-               , "#78563C"
-               ]
+        iterate nextLine windowHeight
 
 
 groundRowPositions : List Float
 groundRowPositions =
     let
-        topBorder =
-            90
-
-        gradientH =
-            10
-
         nextLine h =
-            if h < gradientH then
+            if h < 0 then
                 Nothing
             else
-                Just (h - gradientH)
+                Just (h - 10)
     in
-        topBorder :: iterate nextLine 88
+        iterate nextLine 88
