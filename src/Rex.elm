@@ -81,7 +81,11 @@ update msg model =
                     animate Ducking model
 
         Kill ->
-            { model | state = Dead }
+            { model
+                | state = Dead
+                , width = sizeDucking.width
+                , height = sizeDucking.height
+            }
 
         Tick delta ->
             case model.state of

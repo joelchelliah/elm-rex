@@ -104,6 +104,7 @@ updatePlaying msg ({ hud, rex, cactusGen } as model) =
                     { model
                         | state = GameOver
                         , hud = Hud.update Hud.Highlight hud
+                        , rex = Rex.update Rex.Kill rex
                     }
                 else
                     { model
