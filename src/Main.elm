@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Hud
 import Rex
 import CactusGenerator as CactusGen
 import MovingElement as Elem
@@ -37,6 +38,7 @@ type GameState
 
 type alias Model =
     { state : GameState
+    , hud : Hud.Model
     , rex : Rex.Model
     , cactusGen : CactusGen.Model
     , seed : Int
@@ -52,6 +54,7 @@ init { randomSeed } =
     let
         model =
             { state = New
+            , hud = Hud.init
             , rex = Rex.init
             , cactusGen = CactusGen.init windowWidth <| initialSeed randomSeed
             , seed = randomSeed
@@ -85,56 +88,56 @@ update msg model =
 
 
 updatePlaying : Msg -> Model -> Model
-updatePlaying msg model =
-    case msg of
-        KeyPressed 32 ->
-            { model | state = Paused }
+updatePlaying msg ({ hud, rex, cactusGen } as model) =
+    if (spacePressed msg) then
+        { model | state = Paused }
+    else
+        case msg of
+            KeyPressed code ->
+                { model | rex = Rex.update (codeToRexMsg code) rex }
 
-        KeyPressed code ->
-            { model | rex = Rex.update (codeToMsg code) model.rex }
+            KeyReleased ->
+                { model | rex = Rex.update Rex.Run rex }
 
-        KeyReleased ->
-            { model | rex = Rex.update Rex.Run model.rex }
-
-        Tick delta ->
-            let
-                cacti =
-                    model.cactusGen.cacti
-            in
-                if Rex.hitDetected model.rex cacti then
-                    { model | state = GameOver }
+            Tick delta ->
+                if Rex.hitDetected rex cactusGen.cacti then
+                    { model
+                        | state = GameOver
+                        , hud = Hud.update Hud.Highlight hud
+                    }
                 else
                     { model
-                        | rex = Rex.update (Rex.Tick delta) model.rex
-                        , cactusGen = CactusGen.update delta model.cactusGen
+                        | rex = Rex.update (Rex.Tick delta) rex
+                        , cactusGen = CactusGen.update delta cactusGen
+                        , hud =
+                            if (Rex.hasLanded rex) then
+                                Hud.update Hud.IncScore hud
+                            else
+                                hud
                     }
 
-        SubMsg ->
-            model
+            SubMsg ->
+                model
 
 
 updatePaused : Msg -> Model -> Model
 updatePaused msg model =
-    case msg of
-        KeyPressed 32 ->
-            { model | state = Playing }
-
-        _ ->
-            model
+    if (spacePressed msg) then
+        { model | state = Playing }
+    else
+        model
 
 
 updateGameOver : Msg -> Model -> Model
 updateGameOver msg model =
-    case msg of
-        KeyPressed 32 ->
-            Tuple.first <| init { randomSeed = model.seed }
-
-        _ ->
-            model
+    if (spacePressed msg) then
+        Tuple.first <| init { randomSeed = model.seed }
+    else
+        model
 
 
-codeToMsg : KeyCode -> Rex.Msg
-codeToMsg code =
+codeToRexMsg : KeyCode -> Rex.Msg
+codeToRexMsg code =
     case code of
         40 ->
             Rex.Duck
@@ -144,6 +147,11 @@ codeToMsg code =
 
         _ ->
             Rex.Run
+
+
+spacePressed : Msg -> Bool
+spacePressed msg =
+    msg == KeyPressed 32
 
 
 
@@ -164,7 +172,7 @@ subscriptions _ =
 
 
 view : Model -> Html Msg
-view ({ state, rex, cactusGen } as model) =
+view ({ state, hud, rex, cactusGen } as model) =
     let
         ( w, h ) =
             ( toString windowWidth, toString windowHeight )
@@ -181,14 +189,15 @@ view ({ state, rex, cactusGen } as model) =
             [ renderBackground
             , renderMovingElements cactusGen.cacti
             , renderRex rex
-            , renderMessages state
+            , renderMessages state hud.score
+            , renderHud hud
             ]
     in
         Svg.svg attributes sceneElements
 
 
-renderMessages : GameState -> Svg Msg
-renderMessages state =
+renderMessages : GameState -> Int -> Svg Msg
+renderMessages state score =
     let
         yMiddle =
             windowHeight / 2
@@ -228,8 +237,8 @@ renderMessages state =
 
             GameOver ->
                 Svg.svg []
-                    [ Svg.text_ (attrLarge -20) [ Svg.text "Game Ovər!" ]
-                    , Svg.text_ (attrSmall 15) [ Svg.text "Press SPACE to try again" ]
+                    [ Svg.text_ (attrLarge -50) [ Svg.text "Game Ovər!" ]
+                    , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to try again" ]
                     ]
 
             Playing ->
@@ -253,3 +262,8 @@ renderMovingElements elems =
 renderRex : Rex.Model -> Svg Msg
 renderRex rex =
     map (\_ -> SubMsg) (Rex.view rex)
+
+
+renderHud : Hud.Model -> Svg Msg
+renderHud hud =
+    map (\_ -> SubMsg) (Hud.view hud)

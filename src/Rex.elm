@@ -1,4 +1,4 @@
-module Rex exposing (Model, Msg(..), init, update, hitDetected, view)
+module Rex exposing (Model, Msg(..), init, update, hasLanded, hitDetected, view)
 
 import MovingElement as Elem
 import WindowSize exposing (..)
@@ -98,13 +98,18 @@ update msg model =
                     model
 
 
+hasLanded : Model -> Bool
+hasLanded rex =
+    rex.yPos >= 0 && rex.state == Jumping
+
+
 initJump : Model -> Model
-initJump model =
+initJump rex =
     let
         jumpForce =
             -1.3
     in
-        { model
+        { rex
             | state = Jumping
             , yPos = jumpForce
             , yVel = jumpForce
@@ -112,18 +117,18 @@ initJump model =
 
 
 updateJump : Time -> Model -> Model
-updateJump delta ({ yPos, yVel } as model) =
+updateJump delta ({ yPos, yVel } as rex) =
     let
         gravity =
             0.005
 
         ( state_, yPos_, yVel_ ) =
-            if yPos >= 0 then
+            if (hasLanded rex) then
                 ( Running, 0, 0 )
             else
                 ( Jumping, yPos + yVel * delta, yVel + gravity * delta )
     in
-        { model
+        { rex
             | yPos = yPos_
             , yVel = yVel_
             , state = state_
