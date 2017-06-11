@@ -168,7 +168,7 @@ hitDetected rex obstacles =
                     if rex.state == Jumping then
                         ( 25, 20 )
                     else
-                        ( 6, 10 )
+                        ( 4, 10 )
 
                 xInBounds =
                     margin < xMax - exMin && marginAfter < exMax - xMin

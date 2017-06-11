@@ -16,7 +16,7 @@ init : Float -> Seed -> Model
 init xPos seed0 =
     let
         cactiPositions =
-            [ xPos, xPos + 400, xPos + 700 ]
+            [ xPos - 200, xPos + 200, xPos + 500 ]
 
         ( cacti, seed1 ) =
             generateCacti cactiPositions seed0

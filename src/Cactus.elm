@@ -15,7 +15,7 @@ type alias Msg =
 init : Float -> Int -> Model
 init x i =
     { xPos = x
-    , yPos = 38
+    , yPos = 42
     , width = w
     , height = h
     , img = "images/cactus_" ++ toString i ++ ".png"
