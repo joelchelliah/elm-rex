@@ -2,7 +2,6 @@ module Main exposing (..)
 
 import Rex
 import CactusGenerator as CactusGen
-import DirtGenerator as DirtGen
 import MovingElement as Elem
 import Background
 import WindowSize exposing (..)
@@ -33,14 +32,14 @@ type GameState
     = New
     | Playing
     | Paused
-    | End
+    | GameOver
 
 
 type alias Model =
     { state : GameState
     , rex : Rex.Model
     , cactusGen : CactusGen.Model
-    , dirtGen : DirtGen.Model
+    , seed : Int
     }
 
 
@@ -55,7 +54,7 @@ init { randomSeed } =
             { state = New
             , rex = Rex.init
             , cactusGen = CactusGen.init windowWidth <| initialSeed randomSeed
-            , dirtGen = DirtGen.init windowWidth
+            , seed = randomSeed
             }
     in
         ( model, Cmd.none )
@@ -78,18 +77,11 @@ update msg model =
         Playing ->
             ( updatePlaying msg model, Cmd.none )
 
+        GameOver ->
+            ( updateGameOver msg model, Cmd.none )
+
         _ ->
             ( updatePaused msg model, Cmd.none )
-
-
-updatePaused : Msg -> Model -> Model
-updatePaused msg model =
-    case msg of
-        KeyPressed 32 ->
-            { model | state = Playing }
-
-        _ ->
-            model
 
 
 updatePlaying : Msg -> Model -> Model
@@ -105,13 +97,39 @@ updatePlaying msg model =
             { model | rex = Rex.update Rex.Run model.rex }
 
         Tick delta ->
-            { model
-                | rex = Rex.update (Rex.Tick delta) model.rex
-                , cactusGen = CactusGen.update delta model.cactusGen
-                , dirtGen = DirtGen.update delta model.dirtGen
-            }
+            let
+                cacti =
+                    model.cactusGen.cacti
+            in
+                if Rex.hitDetected model.rex cacti then
+                    { model | state = GameOver }
+                else
+                    { model
+                        | rex = Rex.update (Rex.Tick delta) model.rex
+                        , cactusGen = CactusGen.update delta model.cactusGen
+                    }
 
         SubMsg ->
+            model
+
+
+updatePaused : Msg -> Model -> Model
+updatePaused msg model =
+    case msg of
+        KeyPressed 32 ->
+            { model | state = Playing }
+
+        _ ->
+            model
+
+
+updateGameOver : Msg -> Model -> Model
+updateGameOver msg model =
+    case msg of
+        KeyPressed 32 ->
+            Tuple.first <| init { randomSeed = model.seed }
+
+        _ ->
             model
 
 
@@ -146,7 +164,7 @@ subscriptions _ =
 
 
 view : Model -> Html Msg
-view ({ state, rex, cactusGen, dirtGen } as model) =
+view ({ state, rex, cactusGen } as model) =
     let
         ( w, h ) =
             ( toString windowWidth, toString windowHeight )
@@ -208,7 +226,7 @@ renderMessages state =
                     , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to continue" ]
                     ]
 
-            End ->
+            GameOver ->
                 Svg.svg []
                     [ Svg.text_ (attrLarge -20) [ Svg.text "Game Ovər!" ]
                     , Svg.text_ (attrSmall 15) [ Svg.text "Press SPACE to try again" ]
