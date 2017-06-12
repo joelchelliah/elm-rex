@@ -3,6 +3,7 @@ module Game exposing (..)
 import Hud
 import Rex
 import CactusGenerator as CactusGen
+import CloudGenerator as CloudGen
 import MovingElement as Elem
 import Background
 import WindowSize exposing (..)
@@ -12,7 +13,7 @@ import Keyboard exposing (KeyCode)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import AnimationFrame
-import Random exposing (Seed)
+import Random exposing (Seed, step)
 
 
 -- Model
@@ -30,6 +31,7 @@ type alias Model =
     , hud : Hud.Model
     , rex : Rex.Model
     , cactusGen : CactusGen.Model
+    , cloudGen : CloudGen.Model
     , seed : Seed
     }
 
@@ -40,7 +42,8 @@ init seed =
     , hud = Hud.init
     , rex = Rex.init
     , cactusGen = CactusGen.init windowWidth seed
-    , seed = seed
+    , cloudGen = CloudGen.init seed
+    , seed = Tuple.second <| step Random.bool seed
     }
 
 
@@ -69,7 +72,7 @@ update msg model =
 
 
 updatePlaying : Msg -> Model -> Model
-updatePlaying msg ({ hud, rex, cactusGen } as model) =
+updatePlaying msg ({ hud, rex, cactusGen, cloudGen } as model) =
     if (spacePressed msg) then
         { model | state = Paused }
     else
@@ -91,6 +94,7 @@ updatePlaying msg ({ hud, rex, cactusGen } as model) =
                     { model
                         | rex = Rex.update (Rex.Tick delta) rex
                         , cactusGen = CactusGen.update delta cactusGen
+                        , cloudGen = CloudGen.update delta cloudGen
                         , hud =
                             if (Rex.hasLanded rex) then
                                 Hud.update Hud.IncScore hud
@@ -154,7 +158,7 @@ subscriptions _ =
 
 
 view : Model -> Html Msg
-view { state, hud, rex, cactusGen } =
+view { state, hud, rex, cactusGen, cloudGen } =
     let
         ( w, h ) =
             ( toString windowWidth, toString windowHeight )
@@ -169,6 +173,7 @@ view { state, hud, rex, cactusGen } =
         sceneElements =
             [ viewBackground
             , viewMovingElements cactusGen.cacti
+            , viewMovingElements cloudGen.clouds
             , viewRex rex
             , viewAlert state hud.score
             , viewHud hud
@@ -231,7 +236,7 @@ viewBackground =
     map (\_ -> SubMsg) Background.view
 
 
-viewMovingElements : List (Elem.Model a) -> Svg Msg
+viewMovingElements : List Elem.Model -> Svg Msg
 viewMovingElements elems =
     let
         render elem =

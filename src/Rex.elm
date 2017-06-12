@@ -159,7 +159,7 @@ animate state ({ runCount, frameInc } as model) =
         }
 
 
-hitDetected : Model -> List (Elem.Model a) -> Bool
+hitDetected : Model -> List Elem.Model -> Bool
 hitDetected rex obstacles =
     case obstacles of
         [] ->

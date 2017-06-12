@@ -8,13 +8,13 @@ import Svg.Attributes exposing (..)
 -- Model
 
 
-type alias Model a =
-    { a
-        | xPos : Float
-        , yPos : Float
-        , width : Float
-        , height : Float
-        , img : String
+type alias Model =
+    { xPos : Float
+    , yPos : Float
+    , speed : Float
+    , width : Float
+    , height : Float
+    , img : String
     }
 
 
@@ -26,29 +26,21 @@ type Msg
     = Tick Float
 
 
-update : Float -> Model a -> Model a
-update delta model =
-    { model | xPos = model.xPos + scrollSpeed * delta }
+update : Float -> Model -> Model
+update delta elem =
+    { elem | xPos = elem.xPos + elem.speed * delta }
 
 
 
 -- View
 
 
-view : Model a -> Svg Msg
+view : Model -> Svg Msg
 view elem =
     let
         { exMin, eyMin } =
             bounds elem
     in
-        -- Svg.rect
-        --     [ fill "#F00"
-        --     , x <| toString exMin
-        --     , y <| toString eyMin
-        --     , width <| toString elem.width
-        --     , height <| toString elem.height
-        --     ]
-        --     []
         Svg.image
             [ x <| toString exMin
             , y <| toString eyMin
@@ -59,12 +51,7 @@ view elem =
             []
 
 
-scrollSpeed : Float
-scrollSpeed =
-    -0.4
-
-
-bounds : Model a -> { exMin : Float, exMax : Float, eyMin : Float, eyMax : Float }
+bounds : Model -> { exMin : Float, exMax : Float, eyMin : Float, eyMax : Float }
 bounds elem =
     let
         ( offsetX, offsetY ) =

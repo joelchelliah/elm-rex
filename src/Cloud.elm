@@ -1,4 +1,4 @@
-module Cactus exposing (Model, init, update, view)
+module Cloud exposing (Model, init, update, view)
 
 import MovingElement as Elem
 import Svg exposing (Svg)
@@ -12,14 +12,14 @@ type alias Msg =
     Elem.Msg
 
 
-init : Float -> Int -> Model
-init x i =
+init : Float -> Float -> Int -> Model
+init x spd i =
     { xPos = x
-    , yPos = 42
-    , speed = -0.4
-    , width = 64
-    , height = 84
-    , img = "images/cacti/cactus_" ++ toString i ++ ".png"
+    , yPos = -100
+    , speed = spd
+    , width = 148
+    , height = 60
+    , img = "images/clouds/cloud_" ++ toString i ++ ".png"
     }
 
 
