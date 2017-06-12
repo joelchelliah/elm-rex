@@ -1,15 +1,10 @@
-module Cactus exposing (Model, init, update, view)
+module Cactus exposing (Model, init, update)
 
 import MovingElement as Elem
-import Svg exposing (Svg)
 
 
 type alias Model =
     Elem.Model
-
-
-type alias Msg =
-    Elem.Msg
 
 
 init : Float -> Int -> Model
@@ -26,8 +21,3 @@ init x i =
 update : Float -> Model -> Model
 update =
     Elem.update
-
-
-view : Model -> Svg Msg
-view =
-    Elem.view

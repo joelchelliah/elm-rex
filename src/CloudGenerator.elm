@@ -111,7 +111,7 @@ generateSpeeds num seed0 =
             if i == 0 then
                 0.02
             else
-                (toFloat i) / 100
+                (toFloat i) / 50
 
         speeds =
             map toSpeed speedBases
