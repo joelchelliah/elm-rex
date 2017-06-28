@@ -93,6 +93,6 @@ renderScore { score, state } =
 highlightStyles : State -> ( String, String )
 highlightStyles state =
     if state == Highlighted then
-        ( "red", "0.75" )
+        ( "red", "0.85" )
     else
         ( "black", "0.4" )
