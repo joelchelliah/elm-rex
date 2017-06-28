@@ -225,7 +225,7 @@ render { state, yVel, runCount } =
                     1
 
         toImg action =
-            "images/" ++ action ++ ".png"
+            "images/rex/" ++ action ++ ".png"
     in
         case state of
             Idle ->

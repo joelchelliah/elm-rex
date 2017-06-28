@@ -26,10 +26,6 @@ init x i =
     }
 
 
-type Msg
-    = Tick Float
-
-
 update : Float -> Model -> Model
 update delta elem =
     { elem | xPos = elem.xPos + elem.speed * delta }
@@ -39,7 +35,7 @@ update delta elem =
 -- View
 
 
-view : Model -> Svg Msg
+view : Model -> Svg {}
 view elem =
     let
         { exMin, eyMin } =
@@ -58,6 +54,9 @@ view elem =
 bounds : Model -> { exMin : Float, exMax : Float, eyMin : Float, eyMax : Float }
 bounds elem =
     let
+        offsetFromBottomEdge =
+            100
+
         ( offsetX, offsetY ) =
             ( elem.xPos, windowHeight - offsetFromBottomEdge + elem.yPos )
     in
@@ -66,8 +65,3 @@ bounds elem =
         , eyMin = offsetY - elem.height
         , eyMax = offsetY
         }
-
-
-offsetFromBottomEdge : Float
-offsetFromBottomEdge =
-    100
