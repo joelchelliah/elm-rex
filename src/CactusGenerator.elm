@@ -17,7 +17,7 @@ init : Float -> Seed -> Model
 init xPos seed0 =
     let
         cactiPositions =
-            [ xPos - 200, xPos + 100, xPos + 400 ]
+            [ xPos - 200, xPos + 200, xPos + 500 ]
 
         ( cacti, seed1 ) =
             generateCacti cactiPositions seed0
@@ -73,7 +73,7 @@ generateIndices : Int -> Seed -> ( List Int, Seed )
 generateIndices num seed =
     let
         randomIndex =
-            Random.int 0 2
+            Random.int 0 maxCactusIndex
 
         randomIndices =
             Random.list num randomIndex
@@ -106,3 +106,8 @@ cactusPositionOffset i =
                 ]
     in
         Maybe.withDefault 0 <| get i offsets
+
+
+maxCactusIndex : Int
+maxCactusIndex =
+    4
