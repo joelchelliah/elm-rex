@@ -1,6 +1,6 @@
 module Rex exposing (Model, Msg(..), init, update, hasLanded, hitDetected, view)
 
-import MovingElement as Elem
+import Cactus
 import WindowSize exposing (..)
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
@@ -159,7 +159,7 @@ animate state ({ runCount, frameInc } as model) =
         }
 
 
-hitDetected : Model -> List Elem.Model -> Bool
+hitDetected : Model -> List Cactus.Model -> Bool
 hitDetected rex obstacles =
     case obstacles of
         [] ->
@@ -171,7 +171,7 @@ hitDetected rex obstacles =
                     bounds rex
 
                 { exMin, exMax, eyMin, eyMax } =
-                    Elem.bounds elem
+                    Cactus.bounds elem
 
                 ( margin, marginAfter ) =
                     if rex.state == Jumping then
@@ -187,24 +187,6 @@ hitDetected rex obstacles =
             in
                 if xInBounds && yInBounds then
                     True
-                    -- Debug.crash
-                    --     ("Rex: "
-                    --         ++ (toString xMin)
-                    --         ++ " "
-                    --         ++ (toString xMax)
-                    --         ++ " "
-                    --         ++ (toString yMin)
-                    --         ++ " "
-                    --         ++ (toString yMax)
-                    --         ++ "\n Elem:"
-                    --         ++ (toString exMin)
-                    --         ++ " "
-                    --         ++ (toString exMax)
-                    --         ++ " "
-                    --         ++ (toString eyMin)
-                    --         ++ " "
-                    --         ++ (toString eyMax)
-                    --     )
                 else
                     hitDetected rex rest
 
@@ -219,14 +201,6 @@ view rex =
         { xMin, yMin } =
             bounds rex
     in
-        -- Svg.rect
-        --     [ Attributes.fill "#F00"
-        --     , x "50"
-        --     , y "248"
-        --     , width (toString <| 142 - 50)
-        --     , height (toString <| 340 - 248)
-        --     ]
-        --     []
         Svg.image
             [ x <| toString xMin
             , y <| toString yMin

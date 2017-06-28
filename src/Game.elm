@@ -2,9 +2,8 @@ module Game exposing (..)
 
 import Hud
 import Rex
+import Cactus
 import CactusGenerator as CactusGen
-import CloudGenerator as CloudGen
-import MovingElement as Elem
 import Background
 import WindowSize exposing (..)
 import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text)
@@ -31,7 +30,6 @@ type alias Model =
     , hud : Hud.Model
     , rex : Rex.Model
     , cactusGen : CactusGen.Model
-    , cloudGen : CloudGen.Model
     , seed : Seed
     }
 
@@ -42,7 +40,6 @@ init seed =
     , hud = Hud.init
     , rex = Rex.init
     , cactusGen = CactusGen.init windowWidth seed
-    , cloudGen = CloudGen.init seed
     , seed = Tuple.second <| step Random.bool seed
     }
 
@@ -72,7 +69,7 @@ update msg model =
 
 
 updatePlaying : Msg -> Model -> Model
-updatePlaying msg ({ hud, rex, cactusGen, cloudGen } as model) =
+updatePlaying msg ({ hud, rex, cactusGen } as model) =
     if (spacePressed msg) then
         { model | state = Paused }
     else
@@ -94,7 +91,6 @@ updatePlaying msg ({ hud, rex, cactusGen, cloudGen } as model) =
                     { model
                         | rex = Rex.update (Rex.Tick delta) rex
                         , cactusGen = CactusGen.update delta cactusGen
-                        , cloudGen = CloudGen.update delta cloudGen
                         , hud =
                             if (Rex.hasLanded rex) then
                                 Hud.update Hud.IncScore hud
@@ -158,7 +154,7 @@ subscriptions _ =
 
 
 view : Model -> Html Msg
-view { state, hud, rex, cactusGen, cloudGen } =
+view { state, hud, rex, cactusGen } =
     let
         ( w, h ) =
             ( toString windowWidth, toString windowHeight )
@@ -172,8 +168,7 @@ view { state, hud, rex, cactusGen, cloudGen } =
 
         sceneElements =
             [ viewBackground
-            , viewMovingElements cactusGen.cacti
-            , viewMovingElements cloudGen.clouds
+            , viewCacti cactusGen.cacti
             , viewRex rex
             , viewAlert state hud.score
             , viewHud hud
@@ -236,11 +231,11 @@ viewBackground =
     map (\_ -> SubMsg) Background.view
 
 
-viewMovingElements : List Elem.Model -> Svg Msg
-viewMovingElements elems =
+viewCacti : List Cactus.Model -> Svg Msg
+viewCacti elems =
     let
         render elem =
-            map (\_ -> SubMsg) (Elem.view elem)
+            map (\_ -> SubMsg) (Cactus.view elem)
     in
         Svg.svg [] <| List.map render elems
 
