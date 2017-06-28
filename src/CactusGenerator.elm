@@ -3,6 +3,7 @@ module CactusGenerator exposing (Model, init, update)
 import Cactus
 import Random exposing (Seed, initialSeed, step)
 import List exposing (length, map2)
+import Dict exposing (Dict, fromList, get)
 
 
 type alias Model =
@@ -16,7 +17,7 @@ init : Float -> Seed -> Model
 init xPos seed0 =
     let
         cactiPositions =
-            [ xPos - 200, xPos + 200, xPos + 500 ]
+            [ xPos - 200, xPos + 100, xPos + 400 ]
 
         ( cacti, seed1 ) =
             generateCacti cactiPositions seed0
@@ -45,7 +46,7 @@ update delta model =
 replaceOrUpdate : Float -> Float -> Int -> Cactus.Model -> Cactus.Model
 replaceOrUpdate delta xPos index cactus =
     if cactus.xPos < -cactus.width then
-        Cactus.init xPos index
+        Cactus.init (xPos + cactusPositionOffset index) index
     else
         Cactus.update delta cactus
 
@@ -90,3 +91,18 @@ generateIndex seed0 =
             List.head >> Maybe.withDefault 0
     in
         ( takeFirstFrom indices, seed1 )
+
+
+cactusPositionOffset : Int -> Float
+cactusPositionOffset i =
+    let
+        offsets =
+            fromList
+                [ ( 0, 40 )
+                , ( 1, 80 )
+                , ( 2, 120 )
+                , ( 3, 160 )
+                , ( 4, 200 )
+                ]
+    in
+        Maybe.withDefault 0 <| get i offsets
