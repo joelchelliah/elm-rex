@@ -92,7 +92,7 @@ updatePlaying msg ({ hud, rex, cactusGen } as model) =
                         | rex = Rex.update (Rex.Tick delta) rex
                         , cactusGen = CactusGen.update delta cactusGen
                         , hud =
-                            if (Rex.hasLanded rex) then
+                            if (Rex.hasLandedFromJumping rex) then
                                 Hud.update Hud.IncScore hud
                             else
                                 hud
@@ -115,7 +115,12 @@ updateGameOver msg game =
     if (spacePressed msg) then
         init game.seed
     else
-        game
+        case msg of
+            Tick delta ->
+                { game | rex = Rex.update (Rex.Tick delta) game.rex }
+
+            _ ->
+                game
 
 
 codeToRexMsg : KeyCode -> Rex.Msg

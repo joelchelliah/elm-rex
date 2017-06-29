@@ -95,4 +95,4 @@ highlightStyles state =
     if state == Highlighted then
         ( "red", "0.85" )
     else
-        ( "black", "0.4" )
+        ( "black", "0.6" )

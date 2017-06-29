@@ -1,9 +1,9 @@
-module Rex exposing (Model, Msg(..), init, update, hasLanded, hitDetected, view)
+module Rex exposing (Model, Msg(..), init, update, hasLandedFromJumping, hitDetected, view)
 
 import Cactus
 import WindowSize exposing (..)
 import Svg exposing (Svg, Attribute)
-import Svg.Attributes as Attributes exposing (x, y, width, height, xlinkHref)
+import Svg.Attributes as Attributes exposing (..)
 import Time exposing (Time)
 
 
@@ -70,7 +70,7 @@ update msg model =
                     model
 
                 _ ->
-                    initJump <| animate Running model
+                    initJump 1.3 <| animate Jumping model
 
         Duck ->
             case model.state of
@@ -81,16 +81,15 @@ update msg model =
                     animate Ducking model
 
         Kill ->
-            { model
-                | state = Dead
-                , width = sizeDucking.width
-                , height = sizeDucking.height
-            }
+            initJump 0.7 <| animate Dead model
 
         Tick delta ->
             case model.state of
                 Jumping ->
-                    updateJump delta model
+                    updateAirbourne delta model
+
+                Dead ->
+                    updateAirbourne delta model
 
                 Running ->
                     animate Running model
@@ -102,35 +101,30 @@ update msg model =
                     model
 
 
-hasLanded : Model -> Bool
-hasLanded rex =
+hasLandedFromJumping : Model -> Bool
+hasLandedFromJumping rex =
     rex.yPos >= 0 && rex.state == Jumping
 
 
-initJump : Model -> Model
-initJump rex =
-    let
-        jumpForce =
-            -1.3
-    in
-        { rex
-            | state = Jumping
-            , yPos = jumpForce
-            , yVel = jumpForce
-        }
+initJump : Float -> Model -> Model
+initJump force rex =
+    { rex
+        | yPos = -force
+        , yVel = -force
+    }
 
 
-updateJump : Time -> Model -> Model
-updateJump delta ({ yPos, yVel } as rex) =
+updateAirbourne : Time -> Model -> Model
+updateAirbourne delta ({ yPos, yVel, state } as rex) =
     let
         gravity =
             0.005
 
         ( state_, yPos_, yVel_ ) =
-            if (hasLanded rex) then
+            if (hasLandedFromJumping rex) then
                 ( Running, 0, 0 )
             else
-                ( Jumping, yPos + yVel * delta, yVel + gravity * delta )
+                ( state, yPos + yVel * delta, yVel + gravity * delta )
     in
         { rex
             | yPos = yPos_
@@ -145,6 +139,9 @@ animate state ({ runCount, frameInc } as model) =
         size =
             case state of
                 Ducking ->
+                    sizeDucking
+
+                Dead ->
                     sizeDucking
 
                 _ ->
@@ -217,9 +214,9 @@ render { state, yVel, runCount } =
         runningIndex =
             toString <| runCount % 6
 
-        jumpingIndex =
+        airbourneIndex =
             toString <|
-                if yVel < 0 then
+                if yVel < 0.2 then
                     0
                 else
                     1
@@ -235,13 +232,13 @@ render { state, yVel, runCount } =
                 toImg <| "run_" ++ runningIndex
 
             Jumping ->
-                toImg <| "jump_" ++ jumpingIndex
+                toImg <| "jump_" ++ airbourneIndex
 
             Ducking ->
                 toImg <| "duck_" ++ runningIndex
 
             Dead ->
-                toImg <| "dead"
+                toImg <| "dead_" ++ airbourneIndex
 
 
 sizeRunning : { width : Float, height : Float }
