@@ -39,7 +39,7 @@ init seed =
     { state = New
     , hud = Hud.init
     , rex = Rex.init
-    , cactusGen = CactusGen.init windowWidth seed
+    , cactusGen = CactusGen.init seed
     , seed = Tuple.second <| step Random.bool seed
     }
 

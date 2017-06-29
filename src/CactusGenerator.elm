@@ -1,30 +1,32 @@
 module CactusGenerator exposing (Model, init, update)
 
 import Cactus
+import WindowSize exposing (..)
 import Random exposing (Seed, initialSeed, step)
-import List exposing (length, map2)
+import List exposing (length, range, map, map2, filter)
 import Dict exposing (Dict, fromList, get)
+import Maybe exposing (withDefault)
 
 
 type alias Model =
-    { spawnX : Float
-    , seed : Seed
+    { seed : Seed
     , cacti : List Cactus.Model
+    , spawnTimer : Int
     }
 
 
-init : Float -> Seed -> Model
-init xPos seed0 =
+init : Seed -> Model
+init seed0 =
     let
-        cactiPositions =
-            [ xPos - 200, xPos + 200, xPos + 500 ]
+        startPosition =
+            windowWidth - 200
 
-        ( cacti, seed1 ) =
-            generateCacti cactiPositions seed0
+        ( cactus, seed1 ) =
+            generateCactusAt startPosition seed0
     in
-        { spawnX = xPos
-        , seed = seed1
-        , cacti = cacti
+        { seed = seed1
+        , cacti = [ cactus ]
+        , spawnTimer = 50
         }
 
 
@@ -34,78 +36,47 @@ update delta model =
         ( i, nextSeed ) =
             generateIndex model.seed
 
-        pruneCactus =
-            replaceOrUpdate delta model.spawnX i
+        updatedCacti =
+            map (Cactus.update delta) <| filter Cactus.isVisible model.cacti
     in
-        { model
-            | cacti = List.map pruneCactus model.cacti
-            , seed = nextSeed
-        }
+        if model.spawnTimer == 0 then
+            { model
+                | cacti = (Cactus.init windowWidth i) :: updatedCacti
+                , seed = nextSeed
+                , spawnTimer = getSpawnTime i
+            }
+        else
+            { model
+                | cacti = updatedCacti
+                , seed = nextSeed
+                , spawnTimer = model.spawnTimer - 1
+            }
 
 
-replaceOrUpdate : Float -> Float -> Int -> Cactus.Model -> Cactus.Model
-replaceOrUpdate delta xPos index cactus =
-    if cactus.xPos < -cactus.width then
-        Cactus.init (xPos + cactusPositionOffset index) index
-    else
-        Cactus.update delta cactus
-
-
-generateCacti : List Float -> Seed -> ( List Cactus.Model, Seed )
-generateCacti positions seed0 =
+generateCactusAt : Float -> Seed -> ( Cactus.Model, Seed )
+generateCactusAt position seed0 =
     let
-        numCacti =
-            length positions
-
-        ( is, seed1 ) =
-            generateIndices numCacti seed0
-
-        gen ( pos, i ) =
-            Cactus.init pos i
-
-        randomCacti =
-            List.map gen <| map2 (,) positions is
+        ( i, seed1 ) =
+            generateIndex seed0
     in
-        ( randomCacti, seed1 )
-
-
-generateIndices : Int -> Seed -> ( List Int, Seed )
-generateIndices num seed =
-    let
-        randomIndex =
-            Random.int 0 maxCactusIndex
-
-        randomIndices =
-            Random.list num randomIndex
-    in
-        step randomIndices seed
+        ( Cactus.init position i, seed1 )
 
 
 generateIndex : Seed -> ( Int, Seed )
-generateIndex seed0 =
+generateIndex =
+    step <| Random.int 0 maxCactusIndex
+
+
+getSpawnTime : Int -> Int
+getSpawnTime index =
     let
-        ( indices, seed1 ) =
-            generateIndices 1 seed0
+        indices =
+            range 0 maxCactusIndex
 
-        takeFirstFrom =
-            List.head >> Maybe.withDefault 0
+        withSpawnTime i =
+            ( i, 40 + 7 * i )
     in
-        ( takeFirstFrom indices, seed1 )
-
-
-cactusPositionOffset : Int -> Float
-cactusPositionOffset i =
-    let
-        offsets =
-            fromList
-                [ ( 0, 40 )
-                , ( 1, 80 )
-                , ( 2, 120 )
-                , ( 3, 160 )
-                , ( 4, 200 )
-                ]
-    in
-        Maybe.withDefault 0 <| get i offsets
+        withDefault 0 << get index << fromList << map withSpawnTime <| indices
 
 
 maxCactusIndex : Int

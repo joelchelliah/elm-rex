@@ -1,4 +1,4 @@
-module Cactus exposing (Model, init, update, view, bounds)
+module Cactus exposing (Model, init, update, view, isVisible, bounds)
 
 import WindowSize exposing (..)
 import Svg exposing (Svg)
@@ -27,8 +27,8 @@ init x i =
 
 
 update : Float -> Model -> Model
-update delta elem =
-    { elem | xPos = elem.xPos + elem.speed * delta }
+update delta cactus =
+    { cactus | xPos = cactus.xPos + cactus.speed * delta }
 
 
 
@@ -36,32 +36,37 @@ update delta elem =
 
 
 view : Model -> Svg {}
-view elem =
+view cactus =
     let
         { exMin, eyMin } =
-            bounds elem
+            bounds cactus
     in
         Svg.image
             [ x <| toString exMin
             , y <| toString eyMin
-            , width <| toString elem.width
-            , height <| toString elem.height
-            , xlinkHref elem.img
+            , width <| toString cactus.width
+            , height <| toString cactus.height
+            , xlinkHref cactus.img
             ]
             []
 
 
+isVisible : Model -> Bool
+isVisible cactus =
+    cactus.xPos >= -cactus.width
+
+
 bounds : Model -> { exMin : Float, exMax : Float, eyMin : Float, eyMax : Float }
-bounds elem =
+bounds cactus =
     let
         offsetFromBottomEdge =
             100
 
         ( offsetX, offsetY ) =
-            ( elem.xPos, windowHeight - offsetFromBottomEdge + elem.yPos )
+            ( cactus.xPos, windowHeight - offsetFromBottomEdge + cactus.yPos )
     in
         { exMin = offsetX
-        , exMax = offsetX + elem.width
-        , eyMin = offsetY - elem.height
+        , exMax = offsetX + cactus.width
+        , eyMin = offsetY - cactus.height
         , eyMax = offsetY
         }
