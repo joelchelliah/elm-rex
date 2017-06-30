@@ -6,6 +6,12 @@ h1 {
   border-bottom: 1px solid lightgray;
 }
 
+h1 img {
+  margin: 10px 10px 0;
+  width: 25px;
+  vertical-align: top;
+}
+
 h5 {
   color: gray;
   font-size: 0.9em;
@@ -14,7 +20,9 @@ h5 {
 }
 
 .info {
-  padding-top: 12px;
+  border-top: 1px solid lightgray;
+  padding-top: 8px;
+  margin-top: 8px;
 }
 
 .info a {

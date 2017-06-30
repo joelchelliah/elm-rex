@@ -105,6 +105,7 @@ renderScore { score, state } =
             , fill col
             , opacity alpha
             , fontSize "25"
+            , textAnchor "start"
             ]
     in
         Svg.text_ attrs [ Svg.text <| "Score: " ++ (toString score) ]
@@ -117,11 +118,12 @@ renderHighScore { highScore, state } =
             highlightStyles state
 
         attrs =
-            [ x "800"
+            [ x "980"
             , y "40"
             , fill col
             , opacity alpha
             , fontSize "25"
+            , textAnchor "end"
             ]
     in
         Svg.text_ attrs [ Svg.text <| "High Score: " ++ (toString highScore) ]

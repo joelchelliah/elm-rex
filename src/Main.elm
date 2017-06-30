@@ -1,8 +1,8 @@
 module Main exposing (..)
 
 import Game exposing (Msg)
-import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text)
-import Html.Attributes exposing (href)
+import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text, img)
+import Html.Attributes exposing (href, src)
 import Svg.Attributes exposing (..)
 import Random exposing (Seed, initialSeed)
 import FontAwesome as Icon
@@ -59,8 +59,11 @@ viewHeader : Html Msg
 viewHeader =
     div []
         [ h1 []
-            [ text "ELM-REX" ]
-        , h5 [] [ text "An Elm port of Chrome's T-rex runner game" ]
+            [ img [ src "images/logo_right.png" ] []
+            , text "ELM-REX"
+            , img [ src "images/logo_left.png" ] []
+            ]
+        , h5 [] [ text "- An Elm port of Chrome's T-rex runner game -" ]
         ]
 
 
@@ -73,5 +76,5 @@ viewInfo =
         div
             [ class "info" ]
             [ Icon.github (Color.black) 30
-            , a [ href url ] [ text "Check it out on github" ]
+            , a [ href url ] [ text "Find it on github" ]
             ]
