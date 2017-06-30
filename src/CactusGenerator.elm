@@ -30,26 +30,29 @@ init seed0 =
         }
 
 
-update : Float -> Model -> Model
-update delta model =
+update : Float -> Int -> Model -> Model
+update delta score ({ seed, cacti, spawnTimer } as model) =
     let
         ( i, nextSeed ) =
-            generateIndex model.seed
+            generateIndex seed
+
+        speedInc =
+            toFloat <| score // 500
 
         updatedCacti =
-            map (Cactus.update delta) <| filter Cactus.isVisible model.cacti
+            map (Cactus.update delta) <| filter Cactus.isVisible cacti
     in
-        if model.spawnTimer == 0 then
+        if spawnTimer == 0 then
             { model
-                | cacti = (Cactus.init windowWidth i) :: updatedCacti
+                | cacti = (Cactus.init windowWidth i speedInc) :: updatedCacti
                 , seed = nextSeed
-                , spawnTimer = getSpawnTime i
+                , spawnTimer = getSpawnTime i <| speedInc
             }
         else
             { model
                 | cacti = updatedCacti
                 , seed = nextSeed
-                , spawnTimer = model.spawnTimer - 1
+                , spawnTimer = spawnTimer - 1
             }
 
 
@@ -59,7 +62,7 @@ generateCactusAt position seed0 =
         ( i, seed1 ) =
             generateIndex seed0
     in
-        ( Cactus.init position i, seed1 )
+        ( Cactus.init position i 0, seed1 )
 
 
 generateIndex : Seed -> ( Int, Seed )
@@ -67,18 +70,21 @@ generateIndex =
     step <| Random.int 0 maxCactusIndex
 
 
-getSpawnTime : Int -> Int
-getSpawnTime index =
+getSpawnTime : Int -> Float -> Int
+getSpawnTime index inc =
     let
-        indices =
-            range 0 maxCactusIndex
+        timeDec =
+            floor <| inc * 1.8
 
         withSpawnTime i =
-            ( i, 40 + 7 * i )
+            ( i, 45 + 6 * i - timeDec )
+
+        indices =
+            range 0 maxCactusIndex
     in
         withDefault 0 << get index << fromList << map withSpawnTime <| indices
 
 
 maxCactusIndex : Int
 maxCactusIndex =
-    4
+    5

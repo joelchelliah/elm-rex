@@ -15,11 +15,11 @@ type alias Model =
     }
 
 
-init : Float -> Int -> Model
-init x i =
+init : Float -> Int -> Float -> Model
+init x i speedInc =
     { xPos = x
     , yPos = 42
-    , speed = -0.4
+    , speed = 0.4 + 0.05 * speedInc
     , width = 64
     , height = 84
     , img = "images/cacti/cactus_" ++ toString i ++ ".png"
@@ -28,7 +28,7 @@ init x i =
 
 update : Float -> Model -> Model
 update delta cactus =
-    { cactus | xPos = cactus.xPos + cactus.speed * delta }
+    { cactus | xPos = cactus.xPos - cactus.speed * delta }
 
 
 

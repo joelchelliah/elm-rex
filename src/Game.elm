@@ -90,7 +90,7 @@ updatePlaying msg ({ hud, rex, cactusGen } as model) =
                 else
                     { model
                         | rex = Rex.update (Rex.Tick delta) rex
-                        , cactusGen = CactusGen.update delta cactusGen
+                        , cactusGen = CactusGen.update delta hud.score cactusGen
                         , hud =
                             if (Rex.hasLandedFromJumping rex) then
                                 Hud.update Hud.IncScore hud
