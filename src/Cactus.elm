@@ -19,7 +19,7 @@ init : Float -> Int -> Float -> Model
 init x i speedInc =
     { xPos = x
     , yPos = 42
-    , speed = 0.4 + 0.05 * speedInc
+    , speed = 0.4 + 0.02 * speedInc
     , width = 64
     , height = 84
     , img = "images/cacti/cactus_" ++ toString i ++ ".png"

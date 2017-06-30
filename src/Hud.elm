@@ -10,6 +10,7 @@ import Svg.Attributes exposing (..)
 
 type alias Model =
     { score : Int
+    , highScore : Int
     , state : State
     }
 
@@ -22,6 +23,7 @@ type State
 init : Model
 init =
     { score = 0
+    , highScore = 0
     , state = Normal
     }
 
@@ -32,17 +34,34 @@ init =
 
 type Msg
     = IncScore
+    | Reset
     | Highlight
 
 
 update : Msg -> Model -> Model
-update msg model =
+update msg ({ score, highScore } as model) =
     case msg of
         IncScore ->
-            { model | score = model.score + 100 }
+            { model | score = score + 100 }
+
+        Reset ->
+            { model
+                | score = 0
+                , state = Normal
+            }
 
         Highlight ->
-            { model | state = Highlighted }
+            let
+                newHighScore =
+                    if score > highScore then
+                        score
+                    else
+                        highScore
+            in
+                { model
+                    | highScore = newHighScore
+                    , state = Highlighted
+                }
 
 
 
@@ -54,6 +73,7 @@ view hud =
     Svg.svg []
         [ renderOutline hud
         , renderScore hud
+        , renderHighScore hud
         ]
 
 
@@ -88,6 +108,23 @@ renderScore { score, state } =
             ]
     in
         Svg.text_ attrs [ Svg.text <| "Score: " ++ (toString score) ]
+
+
+renderHighScore : Model -> Svg {}
+renderHighScore { highScore, state } =
+    let
+        ( col, alpha ) =
+            highlightStyles state
+
+        attrs =
+            [ x "800"
+            , y "40"
+            , fill col
+            , opacity alpha
+            , fontSize "25"
+            ]
+    in
+        Svg.text_ attrs [ Svg.text <| "High Score: " ++ (toString highScore) ]
 
 
 highlightStyles : State -> ( String, String )

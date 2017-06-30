@@ -40,7 +40,17 @@ init seed =
     , hud = Hud.init
     , rex = Rex.init
     , cactusGen = CactusGen.init seed
-    , seed = Tuple.second <| step Random.bool seed
+    , seed = nextSeed seed
+    }
+
+
+restart : Model -> Model
+restart game =
+    { state = New
+    , hud = Hud.update Hud.Reset game.hud
+    , rex = Rex.init
+    , cactusGen = CactusGen.init game.seed
+    , seed = nextSeed game.seed
     }
 
 
@@ -113,7 +123,7 @@ updatePaused msg model =
 updateGameOver : Msg -> Model -> Model
 updateGameOver msg game =
     if (spacePressed msg) then
-        init game.seed
+        restart game
     else
         case msg of
             Tick delta ->
@@ -253,3 +263,8 @@ viewRex rex =
 viewHud : Hud.Model -> Svg Msg
 viewHud hud =
     map (\_ -> SubMsg) (Hud.view hud)
+
+
+nextSeed : Seed -> Seed
+nextSeed seed =
+    Tuple.second <| step Random.bool seed
