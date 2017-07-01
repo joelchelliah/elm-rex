@@ -4,6 +4,7 @@ import Hud
 import Rex
 import Cactus
 import CactusGenerator as CactusGen
+import Cloud
 import Background
 import WindowSize exposing (..)
 import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text)
@@ -13,9 +14,6 @@ import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 import AnimationFrame
 import Random exposing (Seed, step)
-
-
--- Model
 
 
 type GameState
@@ -30,6 +28,7 @@ type alias Model =
     , hud : Hud.Model
     , rex : Rex.Model
     , cactusGen : CactusGen.Model
+    , cloud : Cloud.Model
     , seed : Seed
     }
 
@@ -40,6 +39,7 @@ init seed =
     , hud = Hud.init
     , rex = Rex.init
     , cactusGen = CactusGen.init seed
+    , cloud = Cloud.init
     , seed = nextSeed seed
     }
 
@@ -50,12 +50,9 @@ restart game =
     , hud = Hud.update Hud.Reset game.hud
     , rex = Rex.init
     , cactusGen = CactusGen.init game.seed
+    , cloud = game.cloud
     , seed = nextSeed game.seed
     }
-
-
-
--- Update
 
 
 type Msg
@@ -66,41 +63,43 @@ type Msg
 
 
 update : Msg -> Model -> Model
-update msg model =
-    case model.state of
+update msg game =
+    case game.state of
         Playing ->
-            updatePlaying msg model
+            updatePlaying msg game
 
         GameOver ->
-            updateGameOver msg model
+            updateGameOver msg game
 
         _ ->
-            updatePaused msg model
+            updatePaused msg game
 
 
 updatePlaying : Msg -> Model -> Model
-updatePlaying msg ({ hud, rex, cactusGen } as model) =
+updatePlaying msg ({ hud, rex, cactusGen, cloud } as game) =
     if (spacePressed msg) then
-        { model | state = Paused }
+        { game | state = Paused }
     else
         case msg of
             KeyPressed code ->
-                { model | rex = Rex.update (codeToRexMsg code) rex }
+                { game | rex = Rex.update (codeToRexMsg code) rex }
 
             KeyReleased ->
-                { model | rex = Rex.update Rex.Run rex }
+                { game | rex = Rex.update Rex.Run rex }
 
             Tick delta ->
                 if Rex.hitDetected rex cactusGen.cacti then
-                    { model
+                    { game
                         | state = GameOver
                         , hud = Hud.update Hud.Highlight hud
                         , rex = Rex.update Rex.Kill rex
+                        , cloud = Cloud.update delta cloud
                     }
                 else
-                    { model
+                    { game
                         | rex = Rex.update (Rex.Tick delta) rex
                         , cactusGen = CactusGen.update delta hud.score cactusGen
+                        , cloud = Cloud.update delta cloud
                         , hud =
                             if (Rex.hasLandedFromJumping rex) then
                                 Hud.update Hud.IncScore hud
@@ -109,15 +108,15 @@ updatePlaying msg ({ hud, rex, cactusGen } as model) =
                     }
 
             SubMsg ->
-                model
+                game
 
 
 updatePaused : Msg -> Model -> Model
-updatePaused msg model =
+updatePaused msg game =
     if (spacePressed msg) then
-        { model | state = Playing }
+        { game | state = Playing }
     else
-        model
+        game
 
 
 updateGameOver : Msg -> Model -> Model
@@ -127,7 +126,10 @@ updateGameOver msg game =
     else
         case msg of
             Tick delta ->
-                { game | rex = Rex.update (Rex.Tick delta) game.rex }
+                { game
+                    | rex = Rex.update (Rex.Tick delta) game.rex
+                    , cloud = Cloud.update delta game.cloud
+                }
 
             _ ->
                 game
@@ -151,10 +153,6 @@ spacePressed msg =
     msg == KeyPressed 32
 
 
-
--- Subscriptions
-
-
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
@@ -164,12 +162,8 @@ subscriptions _ =
         ]
 
 
-
--- View
-
-
 view : Model -> Html Msg
-view { state, hud, rex, cactusGen } =
+view { state, hud, rex, cactusGen, cloud } =
     let
         ( w, h ) =
             ( toString windowWidth, toString windowHeight )
@@ -184,6 +178,7 @@ view { state, hud, rex, cactusGen } =
         sceneElements =
             [ viewBackground
             , viewCacti cactusGen.cacti
+            , viewCloud cloud
             , viewRex rex
             , viewAlert state hud.score
             , viewHud hud
@@ -253,6 +248,11 @@ viewCacti elems =
             map (\_ -> SubMsg) (Cactus.view elem)
     in
         Svg.svg [] <| List.map render elems
+
+
+viewCloud : Cloud.Model -> Svg Msg
+viewCloud cloud =
+    map (\_ -> SubMsg) (Cloud.view cloud)
 
 
 viewRex : Rex.Model -> Svg Msg
