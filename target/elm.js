@@ -11578,6 +11578,64 @@ var _joelchelliah$elm_rex$CactusGenerator$Model = F3(
 		return {seed: a, cacti: b, spawnTimer: c};
 	});
 
+var _joelchelliah$elm_rex$Cloud$size = {width: 152, height: 84};
+var _joelchelliah$elm_rex$Cloud$view = function (cloud) {
+	return A2(
+		_elm_lang$svg$Svg$image,
+		{
+			ctor: '::',
+			_0: _elm_lang$svg$Svg_Attributes$x(
+				_elm_lang$core$Basics$toString(cloud.xPos)),
+			_1: {
+				ctor: '::',
+				_0: _elm_lang$svg$Svg_Attributes$y(
+					_elm_lang$core$Basics$toString(50)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$svg$Svg_Attributes$width(
+						_elm_lang$core$Basics$toString(_joelchelliah$elm_rex$Cloud$size.width)),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$height(
+							_elm_lang$core$Basics$toString(_joelchelliah$elm_rex$Cloud$size.height)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$svg$Svg_Attributes$opacity('0.3'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$svg$Svg_Attributes$xlinkHref('images/clouds/cloud_0.png'),
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}
+			}
+		},
+		{ctor: '[]'});
+};
+var _joelchelliah$elm_rex$Cloud$update = F2(
+	function (delta, _p0) {
+		var _p1 = _p0;
+		var _p5 = _p1.xPos;
+		var _p4 = _p1.speed;
+		var _p3 = _p1;
+		var _p2 = {ctor: '_Tuple2', _0: 0, _1: _joelchelliah$elm_rex$WindowSize$windowWidth - _joelchelliah$elm_rex$Cloud$size.width};
+		var leftEdge = _p2._0;
+		var rightEdge = _p2._1;
+		return (_elm_lang$core$Native_Utils.cmp(_p5, leftEdge) < 0) ? _elm_lang$core$Native_Utils.update(
+			_p3,
+			{xPos: leftEdge, speed: 0 - _p4}) : ((_elm_lang$core$Native_Utils.cmp(_p5, rightEdge) > 0) ? _elm_lang$core$Native_Utils.update(
+			_p3,
+			{xPos: rightEdge, speed: 0 - _p4}) : _elm_lang$core$Native_Utils.update(
+			_p3,
+			{xPos: _p3.xPos - (_p3.speed * delta)}));
+	});
+var _joelchelliah$elm_rex$Cloud$init = {xPos: 700, speed: 2.0e-2};
+var _joelchelliah$elm_rex$Cloud$Model = F2(
+	function (a, b) {
+		return {xPos: a, speed: b};
+	});
+
 var _joelchelliah$elm_rex$Hud$Model = F3(
 	function (a, b, c) {
 		return {score: a, highScore: b, state: c};
@@ -12157,9 +12215,9 @@ var _joelchelliah$elm_rex$Game$codeToRexMsg = function (code) {
 			return _joelchelliah$elm_rex$Rex$Run;
 	}
 };
-var _joelchelliah$elm_rex$Game$Model = F5(
-	function (a, b, c, d, e) {
-		return {state: a, hud: b, rex: c, cactusGen: d, seed: e};
+var _joelchelliah$elm_rex$Game$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {state: a, hud: b, rex: c, cactusGen: d, cloud: e, seed: f};
 	});
 var _joelchelliah$elm_rex$Game$GameOver = {ctor: 'GameOver'};
 var _joelchelliah$elm_rex$Game$Paused = {ctor: 'Paused'};
@@ -12171,6 +12229,7 @@ var _joelchelliah$elm_rex$Game$init = function (seed) {
 		hud: _joelchelliah$elm_rex$Hud$init,
 		rex: _joelchelliah$elm_rex$Rex$init,
 		cactusGen: _joelchelliah$elm_rex$CactusGenerator$init(seed),
+		cloud: _joelchelliah$elm_rex$Cloud$init,
 		seed: _joelchelliah$elm_rex$Game$nextSeed(seed)
 	};
 };
@@ -12180,6 +12239,7 @@ var _joelchelliah$elm_rex$Game$restart = function (game) {
 		hud: A2(_joelchelliah$elm_rex$Hud$update, _joelchelliah$elm_rex$Hud$Reset, game.hud),
 		rex: _joelchelliah$elm_rex$Rex$init,
 		cactusGen: _joelchelliah$elm_rex$CactusGenerator$init(game.seed),
+		cloud: game.cloud,
 		seed: _joelchelliah$elm_rex$Game$nextSeed(game.seed)
 	};
 };
@@ -12204,10 +12264,18 @@ var _joelchelliah$elm_rex$Game$viewCacti = function (elems) {
 		{ctor: '[]'},
 		A2(_elm_lang$core$List$map, render, elems));
 };
-var _joelchelliah$elm_rex$Game$viewRex = function (rex) {
+var _joelchelliah$elm_rex$Game$viewCloud = function (cloud) {
 	return A2(
 		_elm_lang$html$Html$map,
 		function (_p7) {
+			return _joelchelliah$elm_rex$Game$SubMsg;
+		},
+		_joelchelliah$elm_rex$Cloud$view(cloud));
+};
+var _joelchelliah$elm_rex$Game$viewRex = function (rex) {
+	return A2(
+		_elm_lang$html$Html$map,
+		function (_p8) {
 			return _joelchelliah$elm_rex$Game$SubMsg;
 		},
 		_joelchelliah$elm_rex$Rex$view(rex));
@@ -12215,42 +12283,46 @@ var _joelchelliah$elm_rex$Game$viewRex = function (rex) {
 var _joelchelliah$elm_rex$Game$viewHud = function (hud) {
 	return A2(
 		_elm_lang$html$Html$map,
-		function (_p8) {
+		function (_p9) {
 			return _joelchelliah$elm_rex$Game$SubMsg;
 		},
 		_joelchelliah$elm_rex$Hud$view(hud));
 };
-var _joelchelliah$elm_rex$Game$view = function (_p9) {
-	var _p10 = _p9;
-	var _p12 = _p10.hud;
+var _joelchelliah$elm_rex$Game$view = function (_p10) {
+	var _p11 = _p10;
+	var _p13 = _p11.hud;
 	var sceneElements = {
 		ctor: '::',
 		_0: _joelchelliah$elm_rex$Game$viewBackground,
 		_1: {
 			ctor: '::',
-			_0: _joelchelliah$elm_rex$Game$viewCacti(_p10.cactusGen.cacti),
+			_0: _joelchelliah$elm_rex$Game$viewCacti(_p11.cactusGen.cacti),
 			_1: {
 				ctor: '::',
-				_0: _joelchelliah$elm_rex$Game$viewRex(_p10.rex),
+				_0: _joelchelliah$elm_rex$Game$viewCloud(_p11.cloud),
 				_1: {
 					ctor: '::',
-					_0: A2(_joelchelliah$elm_rex$Game$viewAlert, _p10.state, _p12.score),
+					_0: _joelchelliah$elm_rex$Game$viewRex(_p11.rex),
 					_1: {
 						ctor: '::',
-						_0: _joelchelliah$elm_rex$Game$viewHud(_p12),
-						_1: {ctor: '[]'}
+						_0: A2(_joelchelliah$elm_rex$Game$viewAlert, _p11.state, _p13.score),
+						_1: {
+							ctor: '::',
+							_0: _joelchelliah$elm_rex$Game$viewHud(_p13),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			}
 		}
 	};
-	var _p11 = {
+	var _p12 = {
 		ctor: '_Tuple2',
 		_0: _elm_lang$core$Basics$toString(_joelchelliah$elm_rex$WindowSize$windowWidth),
 		_1: _elm_lang$core$Basics$toString(_joelchelliah$elm_rex$WindowSize$windowHeight)
 	};
-	var w = _p11._0;
-	var h = _p11._1;
+	var w = _p12._0;
+	var h = _p12._1;
 	var attributes = {
 		ctor: '::',
 		_0: _elm_lang$svg$Svg_Attributes$width(w),
@@ -12287,77 +12359,82 @@ var _joelchelliah$elm_rex$Game$spacePressed = function (msg) {
 		_joelchelliah$elm_rex$Game$KeyPressed(32));
 };
 var _joelchelliah$elm_rex$Game$updatePlaying = F2(
-	function (msg, _p13) {
-		var _p14 = _p13;
-		var _p20 = _p14.rex;
-		var _p19 = _p14;
-		var _p18 = _p14.hud;
-		var _p17 = _p14.cactusGen;
+	function (msg, _p14) {
+		var _p15 = _p14;
+		var _p22 = _p15.rex;
+		var _p21 = _p15.hud;
+		var _p20 = _p15;
+		var _p19 = _p15.cloud;
+		var _p18 = _p15.cactusGen;
 		if (_joelchelliah$elm_rex$Game$spacePressed(msg)) {
 			return _elm_lang$core$Native_Utils.update(
-				_p19,
+				_p20,
 				{state: _joelchelliah$elm_rex$Game$Paused});
 		} else {
-			var _p15 = msg;
-			switch (_p15.ctor) {
+			var _p16 = msg;
+			switch (_p16.ctor) {
 				case 'KeyPressed':
 					return _elm_lang$core$Native_Utils.update(
-						_p19,
+						_p20,
 						{
 							rex: A2(
 								_joelchelliah$elm_rex$Rex$update,
-								_joelchelliah$elm_rex$Game$codeToRexMsg(_p15._0),
-								_p20)
+								_joelchelliah$elm_rex$Game$codeToRexMsg(_p16._0),
+								_p22)
 						});
 				case 'KeyReleased':
 					return _elm_lang$core$Native_Utils.update(
-						_p19,
+						_p20,
 						{
-							rex: A2(_joelchelliah$elm_rex$Rex$update, _joelchelliah$elm_rex$Rex$Run, _p20)
+							rex: A2(_joelchelliah$elm_rex$Rex$update, _joelchelliah$elm_rex$Rex$Run, _p22)
 						});
 				case 'Tick':
-					var _p16 = _p15._0;
-					return A2(_joelchelliah$elm_rex$Rex$hitDetected, _p20, _p17.cacti) ? _elm_lang$core$Native_Utils.update(
-						_p19,
+					var _p17 = _p16._0;
+					return A2(_joelchelliah$elm_rex$Rex$hitDetected, _p22, _p18.cacti) ? _elm_lang$core$Native_Utils.update(
+						_p20,
 						{
 							state: _joelchelliah$elm_rex$Game$GameOver,
-							hud: A2(_joelchelliah$elm_rex$Hud$update, _joelchelliah$elm_rex$Hud$Highlight, _p18),
-							rex: A2(_joelchelliah$elm_rex$Rex$update, _joelchelliah$elm_rex$Rex$Kill, _p20)
+							hud: A2(_joelchelliah$elm_rex$Hud$update, _joelchelliah$elm_rex$Hud$Highlight, _p21),
+							rex: A2(_joelchelliah$elm_rex$Rex$update, _joelchelliah$elm_rex$Rex$Kill, _p22),
+							cloud: A2(_joelchelliah$elm_rex$Cloud$update, _p17, _p19)
 						}) : _elm_lang$core$Native_Utils.update(
-						_p19,
+						_p20,
 						{
 							rex: A2(
 								_joelchelliah$elm_rex$Rex$update,
-								_joelchelliah$elm_rex$Rex$Tick(_p16),
-								_p20),
-							cactusGen: A3(_joelchelliah$elm_rex$CactusGenerator$update, _p16, _p18.score, _p17),
-							hud: _joelchelliah$elm_rex$Rex$hasLandedFromJumping(_p20) ? A2(_joelchelliah$elm_rex$Hud$update, _joelchelliah$elm_rex$Hud$IncScore, _p18) : _p18
+								_joelchelliah$elm_rex$Rex$Tick(_p17),
+								_p22),
+							cactusGen: A3(_joelchelliah$elm_rex$CactusGenerator$update, _p17, _p21.score, _p18),
+							cloud: A2(_joelchelliah$elm_rex$Cloud$update, _p17, _p19),
+							hud: _joelchelliah$elm_rex$Rex$hasLandedFromJumping(_p22) ? A2(_joelchelliah$elm_rex$Hud$update, _joelchelliah$elm_rex$Hud$IncScore, _p21) : _p21
 						});
 				default:
-					return _p19;
+					return _p20;
 			}
 		}
 	});
 var _joelchelliah$elm_rex$Game$updatePaused = F2(
-	function (msg, model) {
+	function (msg, game) {
 		return _joelchelliah$elm_rex$Game$spacePressed(msg) ? _elm_lang$core$Native_Utils.update(
-			model,
-			{state: _joelchelliah$elm_rex$Game$Playing}) : model;
+			game,
+			{state: _joelchelliah$elm_rex$Game$Playing}) : game;
 	});
 var _joelchelliah$elm_rex$Game$updateGameOver = F2(
 	function (msg, game) {
 		if (_joelchelliah$elm_rex$Game$spacePressed(msg)) {
 			return _joelchelliah$elm_rex$Game$restart(game);
 		} else {
-			var _p21 = msg;
-			if (_p21.ctor === 'Tick') {
+			var _p23 = msg;
+			if (_p23.ctor === 'Tick') {
+				var _p24 = _p23._0;
 				return _elm_lang$core$Native_Utils.update(
 					game,
 					{
 						rex: A2(
 							_joelchelliah$elm_rex$Rex$update,
-							_joelchelliah$elm_rex$Rex$Tick(_p21._0),
-							game.rex)
+							_joelchelliah$elm_rex$Rex$Tick(_p24),
+							game.rex),
+						cloud: A2(_joelchelliah$elm_rex$Cloud$update, _p24, game.cloud)
 					});
 			} else {
 				return game;
@@ -12365,21 +12442,21 @@ var _joelchelliah$elm_rex$Game$updateGameOver = F2(
 		}
 	});
 var _joelchelliah$elm_rex$Game$update = F2(
-	function (msg, model) {
-		var _p22 = model.state;
-		switch (_p22.ctor) {
+	function (msg, game) {
+		var _p25 = game.state;
+		switch (_p25.ctor) {
 			case 'Playing':
-				return A2(_joelchelliah$elm_rex$Game$updatePlaying, msg, model);
+				return A2(_joelchelliah$elm_rex$Game$updatePlaying, msg, game);
 			case 'GameOver':
-				return A2(_joelchelliah$elm_rex$Game$updateGameOver, msg, model);
+				return A2(_joelchelliah$elm_rex$Game$updateGameOver, msg, game);
 			default:
-				return A2(_joelchelliah$elm_rex$Game$updatePaused, msg, model);
+				return A2(_joelchelliah$elm_rex$Game$updatePaused, msg, game);
 		}
 	});
 var _joelchelliah$elm_rex$Game$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
-var _joelchelliah$elm_rex$Game$subscriptions = function (_p23) {
+var _joelchelliah$elm_rex$Game$subscriptions = function (_p26) {
 	return _elm_lang$core$Platform_Sub$batch(
 		{
 			ctor: '::',
@@ -12390,7 +12467,7 @@ var _joelchelliah$elm_rex$Game$subscriptions = function (_p23) {
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$keyboard$Keyboard$ups(
-						function (_p24) {
+						function (_p27) {
 							return _joelchelliah$elm_rex$Game$KeyReleased;
 						}),
 					_1: {ctor: '[]'}
