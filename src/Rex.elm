@@ -7,9 +7,6 @@ import Svg.Attributes as Attributes exposing (..)
 import Time exposing (Time)
 
 
--- Model
-
-
 type alias Model =
     { state : State
     , yPos : Float
@@ -39,10 +36,6 @@ init =
     , runCount = 1
     , frameInc = 0
     }
-
-
-
--- Update
 
 
 type Msg
@@ -186,10 +179,6 @@ hitDetected rex obstacles =
                     True
                 else
                     hitDetected rex rest
-
-
-
--- View
 
 
 view : Model -> Svg Msg

@@ -1,6 +1,6 @@
 module Cloud exposing (Model, init, update, view)
 
-import WindowSize exposing (..)
+import WindowSize exposing (windowWidth)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
 

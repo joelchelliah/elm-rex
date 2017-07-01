@@ -5,9 +5,6 @@ import Svg exposing (Svg, Attribute)
 import Svg.Attributes exposing (..)
 
 
--- Model
-
-
 type alias Model =
     { score : Int
     , highScore : Int
@@ -26,10 +23,6 @@ init =
     , highScore = 0
     , state = Normal
     }
-
-
-
--- Update
 
 
 type Msg
@@ -62,10 +55,6 @@ update msg ({ score, highScore } as model) =
                     | highScore = newHighScore
                     , state = Highlighted
                 }
-
-
-
--- View
 
 
 view : Model -> Svg {}

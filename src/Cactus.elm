@@ -31,10 +31,6 @@ update delta cactus =
     { cactus | xPos = cactus.xPos - cactus.speed * delta }
 
 
-
--- View
-
-
 view : Model -> Svg {}
 view cactus =
     let
