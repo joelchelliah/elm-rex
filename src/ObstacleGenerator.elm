@@ -1,8 +1,8 @@
-module CactusGenerator exposing (Model, init, update)
+module ObstacleGenerator exposing (Model, init, update)
 
-import Cactus
+import Obstacle
 import WindowSize exposing (..)
-import Random exposing (Seed, initialSeed, step)
+import Random exposing (Seed, initialSeed, step, int)
 import List exposing (length, range, map, map2, filter)
 import Dict exposing (Dict, fromList, get)
 import Maybe exposing (withDefault)
@@ -10,7 +10,7 @@ import Maybe exposing (withDefault)
 
 type alias Model =
     { seed : Seed
-    , cacti : List Cactus.Model
+    , obstacles : List Obstacle.Model
     , spawnTimer : Int
     }
 
@@ -20,54 +20,60 @@ init seed0 =
     let
         startPosition =
             windowWidth - 200
-
-        ( cactus, seed1 ) =
-            generateCactusAt startPosition seed0
+        
+        ( obstacle, seed1 ) =
+            generateObstacleAt startPosition seed0
     in
         { seed = seed1
-        , cacti = [ cactus ]
+        , obstacles = [ obstacle ]
         , spawnTimer = 50
         }
 
 
 update : Float -> Int -> Model -> Model
-update delta score ({ seed, cacti, spawnTimer } as model) =
+update delta score ({ seed, obstacles, spawnTimer } as model) =
     let
         ( i, nextSeed ) =
             generateIndex seed
 
+        (ufoFactor, _ ) = step (int 0 5) seed
+
+        kind = if ufoFactor == 0 then Obstacle.UfoBig 
+            else if ufoFactor <= 2 then Obstacle.Ufo
+            else Obstacle.Cactus
+
         speedInc =
             toFloat <| score // 500
 
-        updatedCacti =
-            map (Cactus.update delta) <| filter Cactus.isVisible cacti
+        updatedObstacles =
+            map (Obstacle.update delta) <| filter Obstacle.isVisible obstacles
     in
         if spawnTimer == 0 then
             { model
-                | cacti = (Cactus.init windowWidth i speedInc) :: updatedCacti
+                | obstacles = (Obstacle.init windowWidth i speedInc kind) :: updatedObstacles
                 , seed = nextSeed
                 , spawnTimer = getSpawnTime i <| speedInc
             }
         else
             { model
-                | cacti = updatedCacti
+                | obstacles = updatedObstacles
                 , seed = nextSeed
                 , spawnTimer = spawnTimer - 1
             }
 
 
-generateCactusAt : Float -> Seed -> ( Cactus.Model, Seed )
-generateCactusAt position seed0 =
+generateObstacleAt : Float -> Seed -> ( Obstacle.Model, Seed )
+generateObstacleAt x seed0 =
     let
         ( i, seed1 ) =
             generateIndex seed0
     in
-        ( Cactus.init position i 0, seed1 )
+        ( Obstacle.init x i 0 Obstacle.Cactus, seed1 )
 
 
 generateIndex : Seed -> ( Int, Seed )
 generateIndex =
-    step <| Random.int 0 maxCactusIndex
+    step <| Random.int 0 maxObstacleIndex
 
 
 getSpawnTime : Int -> Float -> Int
@@ -80,11 +86,11 @@ getSpawnTime index inc =
             ( i, 45 + 6 * i - timeDec )
 
         indices =
-            range 0 maxCactusIndex
+            range 0 maxObstacleIndex
     in
         withDefault 0 << get index << fromList << map withSpawnTime <| indices
 
 
-maxCactusIndex : Int
-maxCactusIndex =
+maxObstacleIndex : Int
+maxObstacleIndex =
     5

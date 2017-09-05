@@ -1,6 +1,6 @@
 module Rex exposing (Model, Msg(..), init, update, hasLandedFromJumping, hitDetected, view)
 
-import Cactus
+import Obstacle
 import WindowSize exposing (..)
 import Svg exposing (Svg, Attribute)
 import Svg.Attributes as Attributes exposing (..)
@@ -149,7 +149,7 @@ animate state ({ runCount, frameInc } as model) =
         }
 
 
-hitDetected : Model -> List Cactus.Model -> Bool
+hitDetected : Model -> List Obstacle.Model -> Bool
 hitDetected rex obstacles =
     case obstacles of
         [] ->
@@ -161,13 +161,13 @@ hitDetected rex obstacles =
                     bounds rex
 
                 { exMin, exMax, eyMin, eyMax } =
-                    Cactus.bounds elem
+                    Obstacle.bounds elem
 
-                ( margin, marginAfter ) =
-                    if rex.state == Jumping then
-                        ( 25, 20 )
-                    else
-                        ( 4, 10 )
+                ( margin, marginAfter ) = 
+                    case rex.state of 
+                        Jumping -> ( 25, 20 )
+                        Ducking -> ( 4, 2 )
+                        _ -> ( 4, 10 )
 
                 xInBounds =
                     margin < xMax - exMin && marginAfter < exMax - xMin
