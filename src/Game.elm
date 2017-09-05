@@ -2,8 +2,8 @@ module Game exposing (..)
 
 import Hud
 import Rex
-import Cactus
-import CactusGenerator as CactusGen
+import Obstacle
+import ObstacleGenerator as ObsGen
 import Cloud
 import Background
 import WindowSize exposing (..)
@@ -27,7 +27,7 @@ type alias Model =
     { state : GameState
     , hud : Hud.Model
     , rex : Rex.Model
-    , cactusGen : CactusGen.Model
+    , obsGen : ObsGen.Model
     , cloud : Cloud.Model
     , seed : Seed
     }
@@ -38,7 +38,7 @@ init seed =
     { state = New
     , hud = Hud.init
     , rex = Rex.init
-    , cactusGen = CactusGen.init seed
+    , obsGen = ObsGen.init seed
     , cloud = Cloud.init
     , seed = nextSeed seed
     }
@@ -49,7 +49,7 @@ restart game =
     { state = New
     , hud = Hud.update Hud.Reset game.hud
     , rex = Rex.init
-    , cactusGen = CactusGen.init game.seed
+    , obsGen = ObsGen.init game.seed
     , cloud = game.cloud
     , seed = nextSeed game.seed
     }
@@ -76,7 +76,7 @@ update msg game =
 
 
 updatePlaying : Msg -> Model -> Model
-updatePlaying msg ({ hud, rex, cactusGen, cloud } as game) =
+updatePlaying msg ({ hud, rex, obsGen, cloud } as game) =
     if (spacePressed msg) then
         { game | state = Paused }
     else
@@ -88,7 +88,7 @@ updatePlaying msg ({ hud, rex, cactusGen, cloud } as game) =
                 { game | rex = Rex.update Rex.Run rex }
 
             Tick delta ->
-                if Rex.hitDetected rex cactusGen.cacti then
+                if Rex.hitDetected rex obsGen.obstacles then
                     { game
                         | state = GameOver
                         , hud = Hud.update Hud.Highlight hud
@@ -98,7 +98,7 @@ updatePlaying msg ({ hud, rex, cactusGen, cloud } as game) =
                 else
                     { game
                         | rex = Rex.update (Rex.Tick delta) rex
-                        , cactusGen = CactusGen.update delta hud.score cactusGen
+                        , obsGen = ObsGen.update delta hud.score obsGen
                         , cloud = Cloud.update delta cloud
                         , hud =
                             if (Rex.hasLandedFromJumping rex) then
@@ -163,7 +163,7 @@ subscriptions _ =
 
 
 view : Model -> Html Msg
-view { state, hud, rex, cactusGen, cloud } =
+view { state, hud, rex, obsGen, cloud } =
     let
         ( w, h ) =
             ( toString windowWidth, toString windowHeight )
@@ -177,7 +177,7 @@ view { state, hud, rex, cactusGen, cloud } =
 
         sceneElements =
             [ viewBackground
-            , viewCacti cactusGen.cacti
+            , viewCacti obsGen.obstacles
             , viewCloud cloud
             , viewRex rex
             , viewAlert state hud.score
@@ -241,11 +241,11 @@ viewBackground =
     map (\_ -> SubMsg) Background.view
 
 
-viewCacti : List Cactus.Model -> Svg Msg
+viewCacti : List Obstacle.Model -> Svg Msg
 viewCacti elems =
     let
         render elem =
-            map (\_ -> SubMsg) (Cactus.view elem)
+            map (\_ -> SubMsg) (Obstacle.view elem)
     in
         Svg.svg [] <| List.map render elems
 
