@@ -1,8 +1,8 @@
 module Cloud exposing (Model, init, update, view)
 
-import WindowSize exposing (windowWidth)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
+import WindowSize exposing (windowWidth)
 
 
 type alias Model =
@@ -24,21 +24,23 @@ update delta ({ xPos, speed } as cloud) =
         ( leftEdge, rightEdge ) =
             ( 0, windowWidth - size.width )
     in
-        if xPos < leftEdge then
-            { cloud | xPos = leftEdge, speed = -speed }
-        else if xPos > rightEdge then
-            { cloud | xPos = rightEdge, speed = -speed }
-        else
-            { cloud | xPos = cloud.xPos - cloud.speed * delta }
+    if xPos < leftEdge then
+        { cloud | xPos = leftEdge, speed = -speed }
+
+    else if xPos > rightEdge then
+        { cloud | xPos = rightEdge, speed = -speed }
+
+    else
+        { cloud | xPos = cloud.xPos - cloud.speed * delta }
 
 
 view : Model -> Svg {}
 view cloud =
     Svg.image
-        [ x <| toString cloud.xPos
-        , y <| toString 50
-        , width <| toString size.width
-        , height <| toString size.height
+        [ x <| String.fromFloat cloud.xPos
+        , y <| String.fromFloat 50
+        , width <| String.fromFloat size.width
+        , height <| String.fromFloat size.height
         , opacity "0.3"
         , xlinkHref "images/clouds/cloud_0.png"
         ]

@@ -1,8 +1,8 @@
 module Hud exposing (Model, Msg(..), init, update, view)
 
-import WindowSize exposing (..)
-import Svg exposing (Svg, Attribute)
+import Svg exposing (Attribute, Svg)
 import Svg.Attributes exposing (..)
+import WindowSize exposing (..)
 
 
 type alias Model =
@@ -48,13 +48,14 @@ update msg ({ score, highScore } as model) =
                 newHighScore =
                     if score > highScore then
                         score
+
                     else
                         highScore
             in
-                { model
-                    | highScore = newHighScore
-                    , state = Highlighted
-                }
+            { model
+                | highScore = newHighScore
+                , state = Highlighted
+            }
 
 
 view : Model -> Svg {}
@@ -72,14 +73,14 @@ renderOutline { state } =
         ( col, alpha ) =
             highlightStyles state
     in
-        Svg.rect
-            [ style <| "fill:none;stroke:" ++ col ++ ";stroke-width:5;opacity:" ++ alpha
-            , x "0"
-            , y "0"
-            , width (toString <| windowWidth)
-            , height (toString <| windowHeight)
-            ]
-            []
+    Svg.rect
+        [ style <| "fill:none;stroke:" ++ col ++ ";stroke-width:5;opacity:" ++ alpha
+        , x "0"
+        , y "0"
+        , width (String.fromFloat <| windowWidth)
+        , height (String.fromFloat <| windowHeight)
+        ]
+        []
 
 
 renderScore : Model -> Svg {}
@@ -97,7 +98,7 @@ renderScore { score, state } =
             , textAnchor "start"
             ]
     in
-        Svg.text_ attrs [ Svg.text <| "Score: " ++ (toString score) ]
+    Svg.text_ attrs [ Svg.text <| "Score: " ++ String.fromInt score ]
 
 
 renderHighScore : Model -> Svg {}
@@ -115,12 +116,13 @@ renderHighScore { highScore, state } =
             , textAnchor "end"
             ]
     in
-        Svg.text_ attrs [ Svg.text <| "High Score: " ++ (toString highScore) ]
+    Svg.text_ attrs [ Svg.text <| "High Score: " ++ String.fromInt highScore ]
 
 
 highlightStyles : State -> ( String, String )
 highlightStyles state =
     if state == Highlighted then
         ( "red", "0.85" )
+
     else
         ( "black", "0.6" )

@@ -1,25 +1,27 @@
-module Main exposing (..)
+module Main exposing (Flags, Model, init, main, subscriptions, update, view, viewHeader, viewInfo)
 
+import Browser
+import FeatherIcons as Icon
 import Game exposing (Msg)
-import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text, img)
+import Html exposing (Html, a, div, h1, h5, img, map, text)
 import Html.Attributes exposing (href, src)
-import Svg.Attributes exposing (..)
 import Random exposing (Seed, initialSeed)
-import FontAwesome as Icon
-import Color
+import Svg.Attributes exposing (..)
 
 
 type alias Model =
-    { game : Game.Model }
+    { game : Game.Model
+    }
 
 
 type alias Flags =
-    { randomSeed : Int }
+    { randomSeed : Int
+    }
 
 
 main : Program Flags Model Msg
 main =
-    programWithFlags
+    Browser.element
         { init = init
         , view = view
         , update = update
@@ -33,12 +35,16 @@ init { randomSeed } =
         seed =
             initialSeed randomSeed
     in
-        { game = Game.init seed } ! [ Cmd.none ]
+    ( { game = Game.init seed }
+    , Cmd.none
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    { model | game = Game.update msg model.game } ! [ Cmd.none ]
+    ( { model | game = Game.update msg model.game }
+    , Cmd.none
+    )
 
 
 subscriptions : Model -> Sub Msg
@@ -73,8 +79,8 @@ viewInfo =
         url =
             "https://github.com/joelchelliah/elm-rex"
     in
-        div
-            [ class "info" ]
-            [ Icon.github (Color.black) 30
-            , a [ href url ] [ text "Find it on github" ]
-            ]
+    div
+        [ class "info" ]
+        [ Icon.github |> Icon.toHtml []
+        , a [ href url ] [ text "Find it on github" ]
+        ]
