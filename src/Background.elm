@@ -1,10 +1,10 @@
 module Background exposing (view)
 
-import WindowSize exposing (..)
 import List exposing (map, map2)
 import List.Extra exposing (iterate)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
+import WindowSize exposing (..)
 
 
 view : Svg {}
@@ -24,7 +24,7 @@ renderSky =
         rows =
             map fillSkyRow skyRowPositions
     in
-        Svg.svg [] rows
+    Svg.svg [] rows
 
 
 renderGround : Svg {}
@@ -42,7 +42,7 @@ renderGround =
         rows =
             map2 identity makeRow groundRowPositions
     in
-        Svg.svg [] <| outline :: rows
+    Svg.svg [] <| outline :: rows
 
 
 fillRow : String -> String -> Float -> Svg {}
@@ -50,9 +50,9 @@ fillRow alpha col yPos =
     Svg.rect
         [ fill col
         , x "0"
-        , y <| toString <| windowHeight - yPos
-        , width <| toString windowWidth
-        , height <| toString yPos
+        , y <| String.fromFloat <| windowHeight - yPos
+        , width <| String.fromFloat windowWidth
+        , height <| String.fromFloat yPos
         , opacity alpha
         ]
         []
@@ -78,10 +78,11 @@ skyRowPositions =
         nextLine h =
             if h < 90 then
                 Nothing
+
             else
                 Just <| h - 15
     in
-        iterate nextLine windowHeight
+    iterate nextLine windowHeight
 
 
 groundRowPositions : List Float
@@ -90,7 +91,8 @@ groundRowPositions =
         nextLine h =
             if h < 0 then
                 Nothing
+
             else
                 Just (h - 10)
     in
-        iterate nextLine 88
+    iterate nextLine 88

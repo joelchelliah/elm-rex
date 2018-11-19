@@ -1,19 +1,19 @@
-module Game exposing (..)
+module Game exposing (GameState(..), Model, Msg(..), init, nextSeed, restart, subscriptions, update, updateGameOver, updatePaused, updatePlaying, view, viewAlert, viewBackground, viewCacti, viewCloud, viewHud, viewRex)
 
-import Hud
-import Rex
+import Background
+import Browser.Events as Events
 import Cactus
 import CactusGenerator as CactusGen
 import Cloud
-import Background
-import WindowSize exposing (..)
-import Html exposing (Html, programWithFlags, h1, h5, div, map, a, text)
-import Time exposing (Time)
-import Keyboard exposing (KeyCode)
+import Controls
+import Html exposing (Html, a, div, h1, h5, map, text)
+import Hud
+import Json.Decode as Decode
+import Random exposing (Seed, step)
+import Rex
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
-import AnimationFrame
-import Random exposing (Seed, step)
+import WindowSize exposing (..)
 
 
 type GameState
@@ -56,8 +56,8 @@ restart game =
 
 
 type Msg
-    = Tick Time
-    | KeyPressed KeyCode
+    = Tick Float
+    | KeyPressed Controls.Key
     | KeyReleased
     | SubMsg
 
@@ -77,88 +77,87 @@ update msg game =
 
 updatePlaying : Msg -> Model -> Model
 updatePlaying msg ({ hud, rex, cactusGen, cloud } as game) =
-    if (spacePressed msg) then
-        { game | state = Paused }
-    else
-        case msg of
-            KeyPressed code ->
-                { game | rex = Rex.update (codeToRexMsg code) rex }
+    case msg of
+        KeyPressed Controls.Space ->
+            { game | state = Paused }
 
-            KeyReleased ->
-                { game | rex = Rex.update Rex.Run rex }
+        KeyPressed key ->
+            { game | rex = Rex.update (keyToRexMsg key) rex }
 
-            Tick delta ->
-                if Rex.hitDetected rex cactusGen.cacti then
-                    { game
-                        | state = GameOver
-                        , hud = Hud.update Hud.Highlight hud
-                        , rex = Rex.update Rex.Kill rex
-                        , cloud = Cloud.update delta cloud
-                    }
-                else
-                    { game
-                        | rex = Rex.update (Rex.Tick delta) rex
-                        , cactusGen = CactusGen.update delta hud.score cactusGen
-                        , cloud = Cloud.update delta cloud
-                        , hud =
-                            if (Rex.hasLandedFromJumping rex) then
-                                Hud.update Hud.IncScore hud
-                            else
-                                hud
-                    }
+        KeyReleased ->
+            { game | rex = Rex.update Rex.Run rex }
 
-            SubMsg ->
-                game
+        Tick delta ->
+            if Rex.hitDetected rex cactusGen.cacti then
+                { game
+                    | state = GameOver
+                    , hud = Hud.update Hud.Highlight hud
+                    , rex = Rex.update Rex.Kill rex
+                    , cloud = Cloud.update delta cloud
+                }
+
+            else
+                { game
+                    | rex = Rex.update (Rex.Tick delta) rex
+                    , cactusGen = CactusGen.update delta hud.score cactusGen
+                    , cloud = Cloud.update delta cloud
+                    , hud =
+                        if Rex.hasLandedFromJumping rex then
+                            Hud.update Hud.IncScore hud
+
+                        else
+                            hud
+                }
+
+        SubMsg ->
+            game
 
 
 updatePaused : Msg -> Model -> Model
 updatePaused msg game =
-    if (spacePressed msg) then
-        { game | state = Playing }
-    else
-        game
+    case msg of
+        KeyPressed Controls.Space ->
+            { game | state = Playing }
+
+        _ ->
+            game
 
 
 updateGameOver : Msg -> Model -> Model
 updateGameOver msg game =
-    if (spacePressed msg) then
-        restart game
-    else
-        case msg of
-            Tick delta ->
-                { game
-                    | rex = Rex.update (Rex.Tick delta) game.rex
-                    , cloud = Cloud.update delta game.cloud
-                }
+    case msg of
+        KeyPressed Controls.Space ->
+            restart game
 
-            _ ->
-                game
-
-
-codeToRexMsg : KeyCode -> Rex.Msg
-codeToRexMsg code =
-    case code of
-        40 ->
-            Rex.Duck
-
-        38 ->
-            Rex.Jump
+        Tick delta ->
+            { game
+                | rex = Rex.update (Rex.Tick delta) game.rex
+                , cloud = Cloud.update delta game.cloud
+            }
 
         _ ->
+            game
+
+
+keyToRexMsg : Controls.Key -> Rex.Msg
+keyToRexMsg code =
+    case code of
+        Controls.Up ->
+            Rex.Jump
+
+        Controls.Down ->
+            Rex.Duck
+
+        Controls.Space ->
             Rex.Run
-
-
-spacePressed : Msg -> Bool
-spacePressed msg =
-    msg == KeyPressed 32
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ AnimationFrame.diffs Tick
-        , Keyboard.downs KeyPressed
-        , Keyboard.ups (\_ -> KeyReleased)
+        [ Events.onAnimationFrameDelta Tick
+        , Events.onKeyDown (Controls.decoder |> Decode.map KeyPressed)
+        , Events.onKeyUp (Decode.succeed KeyReleased)
         ]
 
 
@@ -166,7 +165,7 @@ view : Model -> Html Msg
 view { state, hud, rex, cactusGen, cloud } =
     let
         ( w, h ) =
-            ( toString windowWidth, toString windowHeight )
+            ( String.fromFloat windowWidth, String.fromFloat windowHeight )
 
         attributes =
             [ width w
@@ -184,7 +183,7 @@ view { state, hud, rex, cactusGen, cloud } =
             , viewHud hud
             ]
     in
-        Svg.svg attributes sceneElements
+    Svg.svg attributes sceneElements
 
 
 viewAlert : GameState -> Int -> Svg Msg
@@ -194,46 +193,46 @@ viewAlert state score =
             windowHeight / 2
 
         attrBase =
-            [ x << toString <| windowWidth / 2
+            [ x << String.fromFloat <| windowWidth / 2
             , textAnchor "middle"
             , fill "#C12"
             ]
 
         attrLarge yPos =
-            [ y << toString <| yMiddle + yPos
+            [ y << String.fromFloat <| yMiddle + yPos
             , fontSize "60"
             ]
                 ++ attrBase
 
         attrSmall yPos =
-            [ y << toString <| yMiddle + yPos
+            [ y << String.fromFloat <| yMiddle + yPos
             , fontSize "18"
             ]
                 ++ attrBase
     in
-        case state of
-            New ->
-                Svg.svg []
-                    [ Svg.text_ (attrLarge -50) [ Svg.text "RAWЯ!" ]
-                    , Svg.text_ (attrSmall 0) [ Svg.text "Play using the arrow keys: ↑ ↓" ]
-                    , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to start / pause" ]
-                    ]
+    case state of
+        New ->
+            Svg.svg []
+                [ Svg.text_ (attrLarge -50) [ Svg.text "RAWЯ!" ]
+                , Svg.text_ (attrSmall 0) [ Svg.text "Play using the arrow keys: ↑ ↓" ]
+                , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to start / pause" ]
+                ]
 
-            Paused ->
-                Svg.svg []
-                    [ Svg.text_ (attrLarge -50) [ Svg.text "Paused!" ]
-                    , Svg.text_ (attrSmall 0) [ Svg.text "Play using the arrow keys: ↑ ↓" ]
-                    , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to continue" ]
-                    ]
+        Paused ->
+            Svg.svg []
+                [ Svg.text_ (attrLarge -50) [ Svg.text "Paused!" ]
+                , Svg.text_ (attrSmall 0) [ Svg.text "Play using the arrow keys: ↑ ↓" ]
+                , Svg.text_ (attrSmall 35) [ Svg.text "Press SPACE to continue" ]
+                ]
 
-            GameOver ->
-                Svg.svg []
-                    [ Svg.text_ (attrLarge -40) [ Svg.text "Game Ovər!" ]
-                    , Svg.text_ (attrSmall 25) [ Svg.text "Press SPACE to try again" ]
-                    ]
+        GameOver ->
+            Svg.svg []
+                [ Svg.text_ (attrLarge -40) [ Svg.text "Game Ovər!" ]
+                , Svg.text_ (attrSmall 25) [ Svg.text "Press SPACE to try again" ]
+                ]
 
-            Playing ->
-                Svg.svg [] []
+        Playing ->
+            Svg.svg [] []
 
 
 viewBackground : Svg Msg
@@ -247,7 +246,7 @@ viewCacti elems =
         render elem =
             map (\_ -> SubMsg) (Cactus.view elem)
     in
-        Svg.svg [] <| List.map render elems
+    Svg.svg [] <| List.map render elems
 
 
 viewCloud : Cloud.Model -> Svg Msg
@@ -267,4 +266,4 @@ viewHud hud =
 
 nextSeed : Seed -> Seed
 nextSeed seed =
-    Tuple.second <| step Random.bool seed
+    Tuple.second <| step (Random.constant True) seed

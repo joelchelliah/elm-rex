@@ -1,10 +1,10 @@
-module Rex exposing (Model, Msg(..), init, update, hasLandedFromJumping, hitDetected, view)
+module Rex exposing (Model, Msg(..), hasLandedFromJumping, hitDetected, init, update, view)
 
 import Cactus
-import WindowSize exposing (..)
-import Svg exposing (Svg, Attribute)
+import Svg exposing (Attribute, Svg)
 import Svg.Attributes as Attributes exposing (..)
-import Time exposing (Time)
+import Time
+import WindowSize exposing (..)
 
 
 type alias Model =
@@ -107,23 +107,24 @@ initJump force rex =
     }
 
 
-updateAirbourne : Time -> Model -> Model
+updateAirbourne : Float -> Model -> Model
 updateAirbourne delta ({ yPos, yVel, state } as rex) =
     let
         gravity =
             0.005
 
         ( state_, yPos_, yVel_ ) =
-            if (hasLandedFromJumping rex) then
+            if hasLandedFromJumping rex then
                 ( Running, 0, 0 )
+
             else
                 ( state, yPos + yVel * delta, yVel + gravity * delta )
     in
-        { rex
-            | yPos = yPos_
-            , yVel = yVel_
-            , state = state_
-        }
+    { rex
+        | yPos = yPos_
+        , yVel = yVel_
+        , state = state_
+    }
 
 
 animate : State -> Model -> Model
@@ -140,13 +141,13 @@ animate state ({ runCount, frameInc } as model) =
                 _ ->
                     sizeRunning
     in
-        { model
-            | state = state
-            , width = size.width
-            , height = size.height
-            , runCount = runCount + frameInc
-            , frameInc = 1 - frameInc
-        }
+    { model
+        | state = state
+        , width = size.width
+        , height = size.height
+        , runCount = runCount + frameInc
+        , frameInc = 1 - frameInc
+    }
 
 
 hitDetected : Model -> List Cactus.Model -> Bool
@@ -166,6 +167,7 @@ hitDetected rex obstacles =
                 ( margin, marginAfter ) =
                     if rex.state == Jumping then
                         ( 25, 20 )
+
                     else
                         ( 4, 10 )
 
@@ -175,10 +177,11 @@ hitDetected rex obstacles =
                 yInBounds =
                     margin < yMax - eyMin && margin < eyMax - yMin
             in
-                if xInBounds && yInBounds then
-                    True
-                else
-                    hitDetected rex rest
+            if xInBounds && yInBounds then
+                True
+
+            else
+                hitDetected rex rest
 
 
 view : Model -> Svg Msg
@@ -187,47 +190,48 @@ view rex =
         { xMin, yMin } =
             bounds rex
     in
-        Svg.image
-            [ x <| toString xMin
-            , y <| toString yMin
-            , width <| toString rex.width
-            , height <| toString rex.height
-            , xlinkHref <| render rex
-            ]
-            []
+    Svg.image
+        [ x <| String.fromFloat xMin
+        , y <| String.fromFloat yMin
+        , width <| String.fromFloat rex.width
+        , height <| String.fromFloat rex.height
+        , xlinkHref <| render rex
+        ]
+        []
 
 
 render : Model -> String
 render { state, yVel, runCount } =
     let
         runningIndex =
-            toString <| runCount % 6
+            String.fromInt <| modBy 6 runCount
 
         airbourneIndex =
-            toString <|
+            String.fromFloat <|
                 if yVel < 0.2 then
                     0
+
                 else
                     1
 
         toImg action =
             "images/rex/" ++ action ++ ".png"
     in
-        case state of
-            Idle ->
-                toImg <| "idle"
+    case state of
+        Idle ->
+            toImg <| "idle"
 
-            Running ->
-                toImg <| "run_" ++ runningIndex
+        Running ->
+            toImg <| "run_" ++ runningIndex
 
-            Jumping ->
-                toImg <| "jump_" ++ airbourneIndex
+        Jumping ->
+            toImg <| "jump_" ++ airbourneIndex
 
-            Ducking ->
-                toImg <| "duck_" ++ runningIndex
+        Ducking ->
+            toImg <| "duck_" ++ runningIndex
 
-            Dead ->
-                toImg <| "dead_" ++ airbourneIndex
+        Dead ->
+            toImg <| "dead_" ++ airbourneIndex
 
 
 sizeRunning : { width : Float, height : Float }
@@ -246,11 +250,11 @@ bounds rex =
         ( offsetX, offsetY ) =
             ( offsetFromLeftEdge, windowHeight - offsetFromBottomEdge + rex.yPos )
     in
-        { xMin = offsetX
-        , xMax = offsetX + rex.width
-        , yMin = offsetY - rex.height
-        , yMax = offsetY
-        }
+    { xMin = offsetX
+    , xMax = offsetX + rex.width
+    , yMin = offsetY - rex.height
+    , yMax = offsetY
+    }
 
 
 offsetFromLeftEdge : Float

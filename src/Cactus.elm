@@ -1,8 +1,8 @@
-module Cactus exposing (Model, init, update, view, isVisible, bounds)
+module Cactus exposing (Model, bounds, init, isVisible, update, view)
 
-import WindowSize exposing (..)
 import Svg exposing (Svg)
 import Svg.Attributes exposing (..)
+import WindowSize exposing (..)
 
 
 type alias Model =
@@ -22,7 +22,7 @@ init x i speedInc =
     , speed = 0.4 + 0.02 * speedInc
     , width = 64
     , height = 84
-    , img = "images/cacti/cactus_" ++ toString i ++ ".png"
+    , img = "images/cacti/cactus_" ++ String.fromInt i ++ ".png"
     }
 
 
@@ -37,14 +37,14 @@ view cactus =
         { exMin, eyMin } =
             bounds cactus
     in
-        Svg.image
-            [ x <| toString exMin
-            , y <| toString eyMin
-            , width <| toString cactus.width
-            , height <| toString cactus.height
-            , xlinkHref cactus.img
-            ]
-            []
+    Svg.image
+        [ x <| String.fromFloat exMin
+        , y <| String.fromFloat eyMin
+        , width <| String.fromFloat cactus.width
+        , height <| String.fromFloat cactus.height
+        , xlinkHref cactus.img
+        ]
+        []
 
 
 isVisible : Model -> Bool
@@ -61,8 +61,8 @@ bounds cactus =
         ( offsetX, offsetY ) =
             ( cactus.xPos, windowHeight - offsetFromBottomEdge + cactus.yPos )
     in
-        { exMin = offsetX
-        , exMax = offsetX + cactus.width
-        , eyMin = offsetY - cactus.height
-        , eyMax = offsetY
-        }
+    { exMin = offsetX
+    , exMax = offsetX + cactus.width
+    , eyMin = offsetY - cactus.height
+    , eyMax = offsetY
+    }

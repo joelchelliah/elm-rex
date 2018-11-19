@@ -1,11 +1,11 @@
 module CactusGenerator exposing (Model, init, update)
 
 import Cactus
-import WindowSize exposing (..)
-import Random exposing (Seed, initialSeed, step)
-import List exposing (length, range, map, map2, filter)
 import Dict exposing (Dict, fromList, get)
+import List exposing (filter, length, map, map2, range)
 import Maybe exposing (withDefault)
+import Random exposing (Seed, initialSeed, step)
+import WindowSize exposing (..)
 
 
 type alias Model =
@@ -24,10 +24,10 @@ init seed0 =
         ( cactus, seed1 ) =
             generateCactusAt startPosition seed0
     in
-        { seed = seed1
-        , cacti = [ cactus ]
-        , spawnTimer = 50
-        }
+    { seed = seed1
+    , cacti = [ cactus ]
+    , spawnTimer = 50
+    }
 
 
 update : Float -> Int -> Model -> Model
@@ -42,18 +42,19 @@ update delta score ({ seed, cacti, spawnTimer } as model) =
         updatedCacti =
             map (Cactus.update delta) <| filter Cactus.isVisible cacti
     in
-        if spawnTimer == 0 then
-            { model
-                | cacti = (Cactus.init windowWidth i speedInc) :: updatedCacti
-                , seed = nextSeed
-                , spawnTimer = getSpawnTime i <| speedInc
-            }
-        else
-            { model
-                | cacti = updatedCacti
-                , seed = nextSeed
-                , spawnTimer = spawnTimer - 1
-            }
+    if spawnTimer == 0 then
+        { model
+            | cacti = Cactus.init windowWidth i speedInc :: updatedCacti
+            , seed = nextSeed
+            , spawnTimer = getSpawnTime i <| speedInc
+        }
+
+    else
+        { model
+            | cacti = updatedCacti
+            , seed = nextSeed
+            , spawnTimer = spawnTimer - 1
+        }
 
 
 generateCactusAt : Float -> Seed -> ( Cactus.Model, Seed )
@@ -62,7 +63,7 @@ generateCactusAt position seed0 =
         ( i, seed1 ) =
             generateIndex seed0
     in
-        ( Cactus.init position i 0, seed1 )
+    ( Cactus.init position i 0, seed1 )
 
 
 generateIndex : Seed -> ( Int, Seed )
@@ -82,7 +83,7 @@ getSpawnTime index inc =
         indices =
             range 0 maxCactusIndex
     in
-        withDefault 0 << get index << fromList << map withSpawnTime <| indices
+    withDefault 0 << get index << fromList << map withSpawnTime <| indices
 
 
 maxCactusIndex : Int

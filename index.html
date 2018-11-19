@@ -1,15 +1,16 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Elm-rex</title>
-  <script type="text/javascript" src="target/elm.js"></script>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>Elm-rex</title>
+    <script type="text/javascript" src="target/elm.js"></script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div id="game"></div>
 </body>
 <script type="text/javascript">
-  var seed = { randomSeed: Math.floor(Math.random()*0xFFFFFFFF) }
-  var app  = Elm.Main.fullscreen(seed);
+    var seed = {randomSeed: Math.floor(Math.random() * 0xFFFFFFFF)}
+    var app = Elm.Main.init({node: document.getElementById("game"), flags: seed});
 </script>
 </html>
